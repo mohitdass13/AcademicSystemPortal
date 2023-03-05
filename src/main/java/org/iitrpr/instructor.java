@@ -1,6 +1,7 @@
 package org.iitrpr;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
@@ -13,10 +14,26 @@ import java.util.Scanner;
 //INSERT INTO coreElective VALUES('CS301',1,'{"CSE,MNC"}','{"CIV"}');
 
 public class instructor {
-    void updateGrades(Connection connection) throws IOException {
+    void updateGrades(Connection connection) throws IOException, SQLException {
         System.out.println("enter the course code :\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
         String code=reader.readLine();
+        String file="./src/datafeed/grades.csv";
+        BufferedReader read = null;
+        String line="";
+
+        read=new BufferedReader(new FileReader(file));
+        while((line= read.readLine())!=null)
+        {
+            String[] row=line.split(",");
+            String entryNO=row[0];
+            String grade=row[1];
+            String tabname='s'+entryNO;
+            String qry=String.format("UPDATE %s SET grade = '%s' WHERE course_code='%s'",tabname,grade,code);
+            PreparedStatement stmt=connection.prepareStatement(qry);
+            stmt.execute();
+            stmt.close();
+        }
 
     }
     public void coursesOffered(Connection connection,String username) throws SQLException {

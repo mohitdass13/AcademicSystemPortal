@@ -11,15 +11,14 @@ import java.util.Scanner;
 public class authentication {
     public void login(Connection connection) throws IOException, SQLException {
         academicOffice acoff = new academicOffice();
+
         System.out.println("Enter Username:");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String name = reader.readLine();
-//        System.out.println(name);
         System.out.println("\n");
         System.out.println("Enter Password: ");
         String pass= reader.readLine();
-//        System.out.println(pass);
-//        String te="count";
+
         Integer count=0;
         String role="";
         Statement stmt3 = connection.createStatement();
@@ -37,13 +36,12 @@ public class authentication {
             if(role.equals("student"))
             {
                 while(true) {
+                    System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     System.out.println("Choose the Appropriate Action:\n1. Register a course\n2.Deregister a Course\n3.View Grades\n4.Calculate CGPA\n5.Logout");
-                    System.out.println("--------------------------------------------------------------------------------");
+                    System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     BufferedReader option = new BufferedReader(new InputStreamReader(System.in));
                     String opt = option.readLine();
-                    if(opt.equals("5"))
-                        break;
-                    else if(opt.equals("1"))
+                    if(opt.equals("1"))
                     {
                        students student=new students();
                        student.enroll_course(connection,name);
@@ -53,17 +51,21 @@ public class authentication {
                         students student=new students();
                         student.deregisterCourse(connection,name);
                     }
-                    else if(opt.equals("4"))
-                    {
-//                        BufferedReader rdr=new BufferedReader(new InputStreamReader(System.in));
-                        students st=new students();
-                        System.out.println(st.cgpa_calculate(connection,name));
-                    }
                     else if(opt.equals("3"))
                     {
                         students st=new students();
                         st.view_grades(connection,name);
                     }
+                    else if(opt.equals("4"))
+                    {
+                        students st=new students();
+                        System.out.println("------------------------------------------\n");
+                        System.out.println("Your current CGPA is :  ");
+                        System.out.println(st.cgpa_calculate(connection,name));
+                        System.out.println("------------------------------------------\n");
+                    }
+                    else if(opt.equals("5"))
+                        break;
                 }
 
             }
@@ -71,39 +73,43 @@ public class authentication {
             {
                 while(true)
                 {
-                    System.out.println("Choose the Appropriate Action:\n1. Register a course\n2.Deregister a Course\n3.View Grades of students\n4.Courses Offered\n5.Logout");
-                    System.out.println("--------------------------------------------------------------------------------");
+                    instructor inst=new instructor();
+                    System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
+                    System.out.println("Choose the Appropriate Action:\n1. Register a course\n2.Deregister a Course\n3.View Grades of students\n4.Courses Offered\n5.upload Grades\n6.Logout");
+                    System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     BufferedReader option = new BufferedReader(new InputStreamReader(System.in));
                     String opt = option.readLine();
-                    if(opt.equals("5"))
+                    if(opt.equals("6"))
                         break;
                     else if(opt.equals("1"))
                     {
-                       instructor inst=new instructor();
                        inst.registerCourse(connection,name);
 
                     }
                     else if(opt.equals("2"))
                     {
-                        instructor inst=new instructor();
+
                         inst.dRegisterCourse(connection,name);
                     }
                     else if(opt.equals("4"))
                     {
-                        instructor inst=new instructor();
                         inst.coursesOffered(connection,name);
                     }
                     else if(opt.equals("3"))
                     {
-                        instructor inst=new instructor();
                         inst.viewGrades(connection,name);
+                    }
+                    else if(opt.equals("5"))
+                    {
+                         inst.updateGrades(connection);
                     }
                 }
             }
             else if(role.equals("academics")) {
                 while (true) {
+                    System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     System.out.println("Choose the Appropriate Action:\n1.Edit Course Catalog\n2.View grades of students\n3.Generate Transcripts\n4.Logout");
-                    System.out.println("--------------------------------------------------------------------------------");
+                    System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     BufferedReader reader1 = new BufferedReader(new InputStreamReader(System.in));
                     String option = reader1.readLine();
                     if (option.equals("1")) {
@@ -127,6 +133,9 @@ public class authentication {
                     }
                 }
             }
+        }
+        else {
+            System.out.println("User Not Found!!!!!\n");
         }
     }
 }

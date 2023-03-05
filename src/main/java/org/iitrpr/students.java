@@ -301,32 +301,32 @@ public class students {
     }
     public void enroll_course(Connection connection,String username)throws IOException, SQLException
     {
-//        System.out.println(username);
+
+        academicOffice acaoff=new academicOffice();
+
+        String srecord='s'+username;
+
+        System.out.println("----------------------------------------------------------------------------------------------------------\n");
         String qry="SELECT * FROM course_offering ;";
         Statement st = connection.createStatement();
         ResultSet res = st.executeQuery(qry);
         ResultSetMetaData rsmd = res.getMetaData();
-
         int columnsNumber = rsmd.getColumnCount();
-
         while (res.next()) {
             for(int i = 1 ; i <= columnsNumber; i++){
 
                 System.out.print(res.getString(i) + " ");
 
             }
-
-
-            System.out.println("\n");//Move to the next line to print the next row.
-
+            System.out.println("\n");
         }
-        System.out.println("Enter the Course code and instructor You want to enroll\n");
+        System.out.println("----------------------------------------------------------------------------------------------------------\n");
+
+        System.out.println("Enter the Course code and instructor name\n");
         BufferedReader cc=new BufferedReader(new InputStreamReader(System.in));
         String code=cc.readLine();
         String inst=cc.readLine();
-        String srecord='s'+username;
 
-        academicOffice acaoff=new academicOffice();
 
         Integer syr=0;
         Integer currsem=0;

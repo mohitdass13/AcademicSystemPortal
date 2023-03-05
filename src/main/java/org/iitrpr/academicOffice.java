@@ -7,12 +7,63 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class academicOffice {
     public int regDreg=1;
     public int floatInst=1;
     public int year=2020;
     public int sem=1;
+    public static void generateTranscript(String entryNo, String Transcript) {
+        String home = System.getProperty("user.home");
+        String os = System.getProperty("os.name").toLowerCase();
+        String dDir;
+        if (os.contains("win")) {
+            dDir = "\\Documents\\AcademicSystem\\";
+        } else if (os.contains("mac")) {
+            dDir = "/Documents/AcademicSystem/";
+        } else {
+            dDir = "/Documents/AcademicSystem/";
+        }
+
+        String fullPath = home + dDir + "Transcripts/";
+        File folder = new File(fullPath);
+        folder.mkdirs();
+        String fileName = String.format("%s_Transcript", entryNo);
+        File file = new File(fullPath + fileName + ".txt");
+
+        if (file.exists()) {
+            int i = 1;
+            do {
+                file = new File(fullPath + fileName+"(" + i + ").txt");
+                i++;
+            } while (file.exists());
+        }
+
+
+
+        try {
+            boolean success = file.createNewFile();
+            if (success) {
+            } else {
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while creating the file.");
+            e.printStackTrace();
+        }
+
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writer.write(Transcript);
+
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void addNewCourse(Connection connection) throws SQLException, IOException {
         System.out.println("Enter course code\n");
         BufferedReader reader2=new BufferedReader(new InputStreamReader(System.in));
@@ -49,29 +100,29 @@ public class academicOffice {
 
     }
     public void generateTranscripts(Connection connection) throws IOException, SQLException {
+        String Transcript="";
         System.out.println("Enter the Entry NO of the Student\n");
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String entryNo=bfr.readLine();
 
         String tabname='s'+entryNo;
-        String name="";
-        String dept="";
         String code="";
         String coName="";
         String grade="";
         String credit="";
         String credits="";
         String department="";
-
-        String qry=String.format("SELECT name,dept FROM students WHERE entry_no='%s'",entryNo);
+        String name="";
+        String dept="";
+        String qury=String.format("SELECT name,dept FROM students WHERE entry_no='%s'",entryNo);
         Statement stmt=connection.createStatement();
-        ResultSet result=stmt.executeQuery(qry);
+        ResultSet result=stmt.executeQuery(qury);
         while(result.next())
         {
             name=result.getString("name");
-            dept= result.getString("dept");
+            dept=result.getString("dept");
         }
-        System.out.println(dept);
+
         if(dept.equals("CIV"))
         {
             department="CIVIL ENGINEERING";
@@ -96,6 +147,7 @@ public class academicOffice {
         {
             department="ELECTRICAL ENGINEERING";
         }
+
         Integer maxsem=0;
         String qryt=String.format("SELECT max(semester) FROM %s",tabname);
         Statement stmtt=connection.createStatement();
@@ -107,35 +159,49 @@ public class academicOffice {
         System.out.println(department);
         System.out.println("\n\n");
         System.out.println("                INDIAN INSTITUTE of TECHNOLOGY ROPAR\n");
-        System.out.println("                        Semester Grade Report\n");
+        System.out.println("                         Grade Report\n");
         System.out.printf("Name:            %s\n",name);
         System.out.printf("Entry No:        %s\n",entryNo);
         System.out.printf("Programme:      B.TECH in %s\n\n",department);
         System.out.println("----------------------------------------------------------------------------------------------------------\n");
         System.out.println("Course Code             Course Name             Credits             Grade\n");
         System.out.println("----------------------------------------------------------------------------------------------------------\n");
+        Transcript+=("                                                  INDIAN INSTITUTE of TECHNOLOGY ROPAR\n"+"                                                  Semester Grade Report\n\n"+"Name:            "+name+"\n"+
+                "Entry No:        "+entryNo+"Programme:      B.TECH in "+department+"\n----------------------------------------------------------------------------------------------------------\n"+
+                "Course Code             Course Name             Credits             Grade\n"+"\n----------------------------------------------------------------------------------------------------------\n");
+        while(maxsem>=1) {
+            String[] credt = {};
+            double registeredCredits=0.0;
+//            System.out.println("----------------------------------------------------------------------------------------------------------\n");
+//            System.out.printf("Registered Credits: %f\n",registeredCredits);
+//            System.out.println("----------------------------------------------------------------------------------------------------------\n");
+            String query = String.format("SELECT course_code,course_name,grade FROM %s where semester=%d", tabname,maxsem);
+            Statement stmt2 = connection.createStatement();
+            ResultSet result2 = stmt2.executeQuery(query);
+            while (result2.next()) {
+                code = result2.getString("course_code");
+                coName = result2.getString("course_name");
+                grade = result2.getString("grade");
+                String qry2 = String.format("SELECT credit_strct FROM course_catalog WHERE course_code='%s'", code);
+                Statement stmt3 = connection.createStatement();
+                ResultSet rst = stmt3.executeQuery(qry2);
+                while (rst.next()) {
 
-        String[] credt={};
-        String query=String.format("SELECT course_code,course_name,grade FROM %s",tabname);
-        Statement stmt2=connection.createStatement();
-        ResultSet result2=stmt2.executeQuery(query);
-        while(result2.next())
-        {
-            code=result2.getString("course_code");
-            coName=result2.getString("course_name");
-            grade=result2.getString("grade");
-            String qry2 = String.format("SELECT credit_strct FROM course_catalog WHERE course_code='%s'",code);
-            Statement stmt3 = connection.createStatement();
-            ResultSet rst = stmt3.executeQuery(qry2);
-            while (rst.next()) {
+                    credit = rst.getString("credit_strct");
+                    credt = credit.split("-");
+                    credits = credt[3];
+                    registeredCredits+=Double. parseDouble(credits);
 
-                credit = rst.getString("credit_strct");
-                credt=credit.split("-");
-                credits=credt[3];
+                }
+                System.out.printf("%s              %s              %s              %s\n", code, coName, credits, grade);
+                Transcript+=("              "+code+"              "+coName+"              "+credits+"              "+grade+"\n");
             }
-            System.out.printf("%s              %s              %s              %s\n",code,coName,credits,grade);
+
+            maxsem--;
         }
         System.out.println("\n\n");
+        generateTranscript(entryNo,Transcript);
+
     }
 
     public void viewGradesAll(Connection connection) throws IOException, SQLException {
