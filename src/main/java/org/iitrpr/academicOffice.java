@@ -16,55 +16,103 @@ public class academicOffice {
     public int floatInst=1;
     public int year=2020;
     public int sem=1;
-    public static void generateTranscript(String entryNo, String Transcript) {
-        String home = System.getProperty("user.home");
-        String os = System.getProperty("os.name").toLowerCase();
-        String dDir;
-        if (os.contains("win")) {
-            dDir = "\\Documents\\AcademicSystem\\";
-        } else if (os.contains("mac")) {
-            dDir = "/Documents/AcademicSystem/";
-        } else {
-            dDir = "/Documents/AcademicSystem/";
+    public void startNewSemester(Connection connection)
+    {
+        System.out.println(year);
+        System.out.println(sem);
+        if(sem==1)
+            sem++;
+        else if(sem==2)
+        {
+            year++;
+            sem=1;
         }
-
-        String fullPath = home + dDir + "Transcripts/";
-        File folder = new File(fullPath);
-        folder.mkdirs();
-        String fileName = String.format("%s_Transcript", entryNo);
-        File file = new File(fullPath + fileName + ".txt");
-
-        if (file.exists()) {
-            int i = 1;
-            do {
-                file = new File(fullPath + fileName+"(" + i + ").txt");
-                i++;
-            } while (file.exists());
-        }
-
-
-
-        try {
-            boolean success = file.createNewFile();
-            if (success) {
-            } else {
-            }
-        } catch (IOException e) {
-            System.out.println("An error occurred while creating the file.");
-            e.printStackTrace();
-        }
-
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
-            writer.write(Transcript);
-
-            writer.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println(year);
+        System.out.println(sem);
     }
+    public void setEvent(Connection connection) throws IOException {
+        System.out.println("1.Open Student course Add/Drop\n2.Open Faculty Course Add/Drop \n3.Close Student course Add/Drop\n4.Close faculty Course Add/Drop\n");
+        BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
+        String op=bfr.readLine();
+        if(op.equals("1"))
+        {
+            regDreg=1;
+            floatInst=0;
+        }
+        if(op.equals("2"))
+        {
+            regDreg=0;
+            floatInst=1;
+        }
+        if(op.equals("3"))
+        {
+            regDreg=0;
+        }
+        if(op.equals("4"))
+        {
+            floatInst=0;
+        }
+
+    }
+    public void isGraduated(Connection connection) throws IOException, SQLException {
+        System.out.println("Enter the entry no\n");
+        BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
+        String entryNO=bfr.readLine();
+
+        boolean isCapstoneDone=false;
+        double coreCredits=0.0;
+        double electiveCredits=0.0;
+
+        String tabname='s'+entryNO;
+
+        String credit="";
+        String[] credt={};
+        String credits="";
+        String qry2 = String.format("SELECT credit_strct FROM course_catalog as cc,%s as st WHERE cc.course_code=st.course_code AND course_type='core' AND st.grade<>'F' AND st.grade<>'NA'",tabname);
+        Statement stmt3 = connection.createStatement();
+        ResultSet rst = stmt3.executeQuery(qry2);
+        while (rst.next()) {
+
+            credit = rst.getString("credit_strct");
+            credt = credit.split("-");
+            credits = credt[4];
+            coreCredits+=Double.parseDouble(credits);
+
+        }
+        String qry3 = String.format("SELECT credit_strct FROM course_catalog as cc,%s as st WHERE cc.course_code=st.course_code AND course_type='elective' AND st.grade<>'F' AND st.grade<>'NA'",tabname);
+        Statement stmt4 = connection.createStatement();
+        ResultSet rst2 = stmt4.executeQuery(qry2);
+        while (rst2.next()) {
+
+            credit = rst2.getString("credit_strct");
+            credt = credit.split("-");
+            credits = credt[4];
+            electiveCredits+=Double.parseDouble(credits);
+        }
+
+        Integer count=0;
+        String query=String.format("SELECT count(*) FROM %s WHERE course_code='CP301' AND grade<>'F' AND grade<>'NA'",tabname);
+        Statement stmt=connection.createStatement();
+        ResultSet result=stmt.executeQuery(query);
+        while(result.next())
+        {
+            count=result.getInt("count");
+        }
+        if(count>=1) {
+            isCapstoneDone = true;
+        }
+        if(coreCredits>=4 && electiveCredits>=1.5 && isCapstoneDone)
+        {
+            System.out.println("Yes!!!     This Guy is able to be graduate\n");
+        }
+        else {
+            System.out.println("NO!!! This guy has not completed the required credits for graduation\n");
+        }
+
+    }
+
     public void addNewCourse(Connection connection) throws SQLException, IOException {
+        Scanner scan=new Scanner(new InputStreamReader(System.in));
         System.out.println("Enter course code\n");
         BufferedReader reader2=new BufferedReader(new InputStreamReader(System.in));
         String Coursecode=reader2.readLine();
@@ -74,11 +122,23 @@ public class academicOffice {
         String creditStruct=reader2.readLine();
         System.out.println("Enter Prerequisites\n");
         String preReq=reader2.readLine();
-        System.out.println("Enter minsem required\n");
-        Scanner scan=new Scanner(new InputStreamReader(System.in));
+        System.out.println("Enter minimum semester required to register the course\n");
         Integer minsem= scan.nextInt();
+        System.out.println("Enter the batch onwards\n");
+        Integer batch=scan.nextInt();
+        System.out.println("Enter the branches for which this course would be program core\n");
+        String core=reader2.readLine();
+        System.out.println("Enter the branches for which this course is elective\n");
+        String elective=reader2.readLine();
+
         preReq=preReq.replace("\"","");
         String[] pre = preReq.split(",");
+
+        core=core.replace("\"","");
+        String[] cores = core.split(",");
+
+        elective=elective.replace("\"","");
+        String[] electives = elective.split(",");
 
         List<String> preRequis = new ArrayList<>();
         if(!preReq.equals(""))
@@ -89,22 +149,55 @@ public class academicOffice {
         }
         Array array = connection.createArrayOf("VARCHAR", preRequis.toArray());
 
-        String qry=String.format("INSERT INTO course_catalog VALUES(?,?,?,?)");
+        String qry=String.format("INSERT INTO course_catalog VALUES(?,?,?,?,?)");
         PreparedStatement pstmt=connection.prepareStatement(qry);
         pstmt.setString(1,Coursecode);
         pstmt.setString(2,courseName);
         pstmt.setString(3,creditStruct);
         pstmt.setArray(4,array);
+        pstmt.setInt(5,batch);
         pstmt.execute();
         pstmt.close();
 
+        List<String> corel = new ArrayList<>();
+        if(!core.equals(""))
+        {
+            for (int i = 0; i < cores.length; i++) {
+                corel.add(cores[i]);
+            }
+        }
+        Array arr1 = connection.createArrayOf("VARCHAR", corel.toArray());
+
+        List<String> electivel = new ArrayList<>();
+        if(!elective.equals(""))
+        {
+            for (int i = 0; i < electives.length; i++) {
+                electivel.add(electives[i]);
+            }
+        }
+        Array arr2 = connection.createArrayOf("VARCHAR", electivel.toArray());
+
+        String qry2=String.format("INSERT INTO coreelective values(?,?,?,?)");
+        PreparedStatement pstmt2=connection.prepareStatement(qry2);
+        pstmt2.setString(1,Coursecode);
+        pstmt2.setInt(2,minsem);
+        pstmt2.setArray(3,arr1);
+        pstmt2.setArray(4,arr2);
+        pstmt2.execute();
+        pstmt2.close();
+
     }
     public void generateTranscripts(Connection connection) throws IOException, SQLException {
+        Scanner scan=new Scanner(System.in);
+        generateTxtfiles gtxt=new generateTxtfiles();
         String Transcript="";
         System.out.println("Enter the Entry NO of the Student\n");
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String entryNo=bfr.readLine();
-
+        System.out.println("Enter the semester for which you want to generate transcript:\n");
+        Integer sem= scan.nextInt();
+        System.out.println(sem);
+        entryNo=entryNo.toLowerCase();
         String tabname='s'+entryNo;
         String code="";
         String coName="";
@@ -147,15 +240,15 @@ public class academicOffice {
         {
             department="ELECTRICAL ENGINEERING";
         }
-
-        Integer maxsem=0;
-        String qryt=String.format("SELECT max(semester) FROM %s",tabname);
-        Statement stmtt=connection.createStatement();
-        ResultSet rest= stmtt.executeQuery(qryt);
-        while(rest.next())
-        {
-            maxsem=rest.getInt("max");
-        }
+//
+//        Integer maxsem=0;
+//        String qryt=String.format("SELECT max(semester) FROM %s",tabname);
+//        Statement stmtt=connection.createStatement();
+//        ResultSet rest= stmtt.executeQuery(qryt);
+//        while(rest.next())
+//        {
+//            maxsem=rest.getInt("max");
+//        }
         System.out.println(department);
         System.out.println("\n\n");
         System.out.println("                INDIAN INSTITUTE of TECHNOLOGY ROPAR\n");
@@ -169,13 +262,9 @@ public class academicOffice {
         Transcript+=("                                                  INDIAN INSTITUTE of TECHNOLOGY ROPAR\n"+"                                                  Semester Grade Report\n\n"+"Name:            "+name+"\n"+
                 "Entry No:        "+entryNo+"Programme:      B.TECH in "+department+"\n----------------------------------------------------------------------------------------------------------\n"+
                 "Course Code             Course Name             Credits             Grade\n"+"\n----------------------------------------------------------------------------------------------------------\n");
-        while(maxsem>=1) {
             String[] credt = {};
             double registeredCredits=0.0;
-//            System.out.println("----------------------------------------------------------------------------------------------------------\n");
-//            System.out.printf("Registered Credits: %f\n",registeredCredits);
-//            System.out.println("----------------------------------------------------------------------------------------------------------\n");
-            String query = String.format("SELECT course_code,course_name,grade FROM %s where semester=%d", tabname,maxsem);
+            String query = String.format("SELECT course_code,course_name,grade FROM %s where semester=%d", tabname,sem);
             Statement stmt2 = connection.createStatement();
             ResultSet result2 = stmt2.executeQuery(query);
             while (result2.next()) {
@@ -189,18 +278,15 @@ public class academicOffice {
 
                     credit = rst.getString("credit_strct");
                     credt = credit.split("-");
-                    credits = credt[3];
+                    credits = credt[4];
                     registeredCredits+=Double. parseDouble(credits);
 
                 }
                 System.out.printf("%s              %s              %s              %s\n", code, coName, credits, grade);
                 Transcript+=("              "+code+"              "+coName+"              "+credits+"              "+grade+"\n");
             }
-
-            maxsem--;
-        }
         System.out.println("\n\n");
-        generateTranscript(entryNo,Transcript);
+        gtxt.generateTranscript(entryNo,Transcript);
 
     }
 
@@ -208,7 +294,7 @@ public class academicOffice {
         System.out.println("Enter the Entry No. of the Student You wanna see the grades\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
         String entryno=reader.readLine();
-
+        entryno=entryno.toLowerCase();
         String tabname='s'+entryno;
         boolean isStudentExists=true;
 
@@ -237,9 +323,7 @@ public class academicOffice {
                     System.out.print(res.getString(i) + " ");
 
                 }
-
-
-                System.out.println("\n");//Move to the next line to print the next row.
+                System.out.println("\n");
 
             }
         }
@@ -249,9 +333,8 @@ public class academicOffice {
 
     }
 
-    public void addStudent(Connection connection,String name,String email,String entryno,String dept,Integer entryyr)
-    {
-        try{
+    public void addStudent(Connection connection,String name,String email,String entryno,String dept,Integer entryyr) throws SQLException {
+
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO students VALUES(?, ?, ?, ?, ?)");
             pstmt.setString(1, name);
             pstmt.setString(2, email);
@@ -261,7 +344,6 @@ public class academicOffice {
             pstmt.execute();
             pstmt.close();
             System.out.printf("A new student has been added to the system with name %s\n",name);
-//            Character c=name.charAt(0);
             String name2='s'+entryno;
             String qry=String.format("CREATE TABLE %s (course_code VARCHAR(6),course_name VARCHAR(30),semester INTEGER,grade VARCHAR(2),course_type VARCHAR(20))",name2);
             PreparedStatement pstmt2=connection.prepareStatement(qry);
@@ -270,11 +352,5 @@ public class academicOffice {
             System.out.println("Student Record Created Successfully!!");
 
         }
-        catch(SQLException e)
-        {
-            System.out.println(e.getMessage());
-        }
 
-
-    }
 }

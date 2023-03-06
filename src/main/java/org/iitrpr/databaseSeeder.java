@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class databaseSeeder {
@@ -66,7 +67,7 @@ public class databaseSeeder {
            {
                String[] row=line.split(",");
                String name=row[0];
-               String entry_no=row[2];
+               String entry_no=row[2].toLowerCase();
                String emailid=row[1];
                String dept=row[3];
                Integer entryyr=Integer.parseInt(row[4]);
@@ -116,10 +117,6 @@ public class databaseSeeder {
                     pstmt2.execute();
                     pstmt2.close();
                 }
-
-
-
-
             }
         }catch(Exception e)
         {

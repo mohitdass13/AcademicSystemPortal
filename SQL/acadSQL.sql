@@ -8,9 +8,10 @@ CREATE TABLE course_catalog
 (
     course_code VARCHAR(6),
     course_name VARCHAR(30),
-    credit_strct VARCHAR(10),
+    credit_strct VARCHAR(20),
     preRequisites TEXT[][],
-    PRIMARY KEY(course_code)
+    batch_onward INTEGER,
+    PRIMARY KEY(course_code,batch_onward)
 );
 
 CREATE TABLE course_offering
@@ -22,8 +23,7 @@ CREATE TABLE course_offering
     minsem_req  INTEGER,
     core TEXT ARRAY,
     elective TEXT ARRAY,
-    PRIMARY KEY(course_code,instructor),
-    FOREIGN KEY(course_code) REFERENCES course_catalog(course_code)
+    PRIMARY KEY(course_code,instructor)
 );
 
 CREATE TABLE students
@@ -44,37 +44,12 @@ CREATE TABLE users
 );
 CREATE TABLE coreElective
 (
-    course_code VARCHAR(6) PRIMARY KEY,
+    course_code VARCHAR(6),
     minsem_req  INTEGER,
     core VARCHAR[],
-    elective VARCHAR[],
-    FOREIGN KEY(course_code) REFERENCES course_catalog(course_code)
+    elective VARCHAR[]
 );
 
-
-
-INSERT INTO course_catalog VALUES ('CS301','DATABASE SYSTEMS','6-1-2-3','{}');
-INSERT INTO course_catalog VALUES ('HS104','PROFESSIONAL ETHICS','6-1-2-3','{}');
-
-INSERT INTO coreElective VALUES('CS301',0,'{"CSE,MNC"}','{"CIV"}');
-INSERT INTO coreElective VALUES('HS104',0,'{"CSE","MNC"}','{"CIV"}');
-
-
-
---INSERT INTO course_offering VALUES('CS301','DR.GUNTURI',0.0,1,'{"CSE","MNC"}','{"CIV"}');
---INSERT INTO course_offering VALUES('HS104','DR.SKUMAR',0.0,0,'{"CSE","MNC"}','{"CIV"}');
-
-CREATE OR REPLACE FUNCTION calculate_sum_of_grades(
-  table_name text,
-  column_name text
-) RETURNS integer AS $$
-DECLARE
-  sum integer := 0;
-BEGIN
-  EXECUTE 'SELECT SUM(CAST(' || quote_ident(column_name) || ' AS integer)) FROM ' || quote_ident(table_name) INTO sum;
-  RETURN sum;
-END;
-$$ LANGUAGE plpgsql;
 
 
 

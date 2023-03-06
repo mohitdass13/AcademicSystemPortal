@@ -35,6 +35,7 @@ public class authentication {
 
             if(role.equals("student"))
             {
+                name=name.toLowerCase();
                 while(true) {
                     System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     System.out.println("Choose the Appropriate Action:\n1. Register a course\n2.Deregister a Course\n3.View Grades\n4.Calculate CGPA\n5.Logout");
@@ -108,7 +109,7 @@ public class authentication {
             else if(role.equals("academics")) {
                 while (true) {
                     System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
-                    System.out.println("Choose the Appropriate Action:\n1.Edit Course Catalog\n2.View grades of students\n3.Generate Transcripts\n4.Logout");
+                    System.out.println("Choose the Appropriate Action:\n1.Edit Course Catalog\n2.View grades of students\n3.Generate Transcripts\n4.Open/close an event\n5.Start New Acdemic Semester\n6.Check Graduation of a student\n7.Logout");
                     System.out.println("------------------------------------------------------------------------------------------------------------------------\n");
                     BufferedReader reader1 = new BufferedReader(new InputStreamReader(System.in));
                     String option = reader1.readLine();
@@ -119,9 +120,10 @@ public class authentication {
                         if (option2.equals("1")) {
                             acoff.addNewCourse(connection);
                         }
-                    }
-                    else if(option.equals("4")) {
-                        break;
+                        else if(option2.equals("2"))
+                        {
+                            acoff.addNewCourse(connection);
+                        }
                     }
                     else if(option.equals("2")) {
 
@@ -130,6 +132,20 @@ public class authentication {
                     else if(option.equals("3"))
                     {
                         acoff.generateTranscripts(connection);
+                    }
+                    else if(option.equals("4"))
+                    {
+                        acoff.setEvent(connection);
+                    }
+                    else if(option.equals("5"))
+                    {
+                        acoff.startNewSemester(connection);
+                    }
+                    else if(option.equals("6")) {
+                        acoff.isGraduated(connection);
+                    }
+                    else if(option.equals("7")) {
+                        break;
                     }
                 }
             }

@@ -67,7 +67,7 @@ public class instructor {
         System.out.println("Enter the Entry No. of the Student You wanna see the grades\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
         String entryno=reader.readLine();
-
+        entryno=entryno.toLowerCase();
         String tabname='s'+entryno;
         boolean isStudentExists=true;
 
@@ -160,6 +160,17 @@ public class instructor {
         Scanner scan = new Scanner(System.in);
         double cgpa_const = scan.nextDouble();
 
+        boolean isexist = false;
+        Integer count2 = 0;
+        String qrye = String.format("SELECT count(*) FROM course_catalog WHERE course_code='%s'", code);
+        Statement stmnt = connection.createStatement();
+        ResultSet res = stmnt.executeQuery(qrye);
+        while (res.next()) {
+            count2 = res.getInt("count");
+        }
+        if (count2 >= 1)
+            isexist = true;
+
         String name = "";
         String query = String.format("SELECT name FROM users WHERE username='%s'", username);
         Statement stmt = connection.createStatement();
@@ -167,7 +178,8 @@ public class instructor {
         while (result.next()) {
             name = result.getString("name");
         }
-        boolean isAlready = true;
+        boolean isnotAlready = true;
+
         int count = 0;
         String qry2 = String.format("SELECT count(*) FROM course_offering WHERE course_code='%s' AND instructor='%s'", code, name);
         Statement stmt3 = connection.createStatement();
@@ -176,63 +188,65 @@ public class instructor {
             count = rst.getInt("count");
         }
         if (count >= 1)
-            isAlready = false;
-//        System.out.println(isAready);
+            isnotAlready = false;
         academicOffice acaoff = new academicOffice();
-        if (acaoff.floatInst == 1)
-        {
-            if (isAlready) {
+        if (isexist) {
+            if (acaoff.floatInst == 1) {
+                if (isnotAlready) {
 
-                String qry = String.format("SELECT minsem_req,core,elective FROM coreElective WHERE course_code='%s'", code);
-                Statement stmt2 = connection.createStatement();
-                ResultSet result2 = stmt2.executeQuery(qry);
-                while (result2.next()) {
-                    int minsem = result2.getInt(1);
-                    String core = result2.getString(2);
-                    String elective = result2.getString(3);
+                    String qry = String.format("SELECT minsem_req,core,elective FROM coreElective WHERE course_code='%s'", code);
+                    Statement stmt2 = connection.createStatement();
+                    ResultSet result2 = stmt2.executeQuery(qry);
+                    while (result2.next()) {
+                        int minsem = result2.getInt(1);
+                        String core = result2.getString(2);
+                        String elective = result2.getString(3);
 
-                    core = core.replace("{", "");
-                    core = core.replace("}", "");
-                    elective = elective.replace("{", "");
-                    elective = elective.replace("}", "");
-                    core = core.replace("\"", "");
-                    elective = elective.replace("\"", "");
+                        core = core.replace("{", "");
+                        core = core.replace("}", "");
+                        elective = elective.replace("{", "");
+                        elective = elective.replace("}", "");
+                        core = core.replace("\"", "");
+                        elective = elective.replace("\"", "");
 
-                    String[] cor = core.split(",");
-                    String[] elect = elective.split(",");
+                        String[] cor = core.split(",");
+                        String[] elect = elective.split(",");
 
-                    List<String> co = new ArrayList<>();
-                    List<String> elec = new ArrayList<>();
-                    for (int i = 0; i < cor.length; i++) {
-                        co.add(cor[i]);
+                        List<String> co = new ArrayList<>();
+                        List<String> elec = new ArrayList<>();
+                        for (int i = 0; i < cor.length; i++) {
+                            co.add(cor[i]);
+                        }
+                        for (int i = 0; i < elect.length; i++) {
+                            elec.add(elect[i]);
+                        }
+
+
+                        Array array = connection.createArrayOf("VARCHAR", co.toArray());
+                        Array array2 = connection.createArrayOf("VARCHAR", elec.toArray());
+
+                        PreparedStatement pstmt = connection.prepareStatement("INSERT INTO course_offering VALUES(?,?,?,?,?,?,?)");
+                        pstmt.setString(1, code);
+                        pstmt.setString(2, name);
+                        pstmt.setString(3, username);
+                        pstmt.setDouble(4, cgpa_const);
+                        pstmt.setInt(5, minsem);
+                        pstmt.setArray(6, array);
+                        pstmt.setArray(7, array2);
+
+                        pstmt.execute();
+                        pstmt.close();
                     }
-                    for (int i = 0; i < elect.length; i++) {
-                        elec.add(elect[i]);
-                    }
-
-
-                    Array array = connection.createArrayOf("VARCHAR", co.toArray());
-                    Array array2 = connection.createArrayOf("VARCHAR", elec.toArray());
-
-                    PreparedStatement pstmt = connection.prepareStatement("INSERT INTO course_offering VALUES(?,?,?,?,?,?,?)");
-                    pstmt.setString(1, code);
-                    pstmt.setString(2, name);
-                    pstmt.setString(3, username);
-                    pstmt.setDouble(4, cgpa_const);
-                    pstmt.setInt(5, minsem);
-                    pstmt.setArray(6, array);
-                    pstmt.setArray(7,array2);
-
-                    pstmt.execute();
-                    pstmt.close();
+                } else {
+                    System.out.println("You have already floated this course\n");
                 }
-            } else {
-                System.out.println("You have already floated this course\n");
-            }
 
+            } else {
+                System.out.println("Course Registration is not open\n");
+            }
         }
         else {
-            System.out.println("Course Registration is not open\n");
+            System.out.println("This course does not exist int course catalog\n");
         }
     }
 

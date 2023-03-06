@@ -7,14 +7,41 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class students {
+    public boolean idNotAreadyCompleted(Connection connection,String username,String code,Integer currsem) throws SQLException {
+        String tabname='s'+username;
+        Integer count=0;
+        String qry=String .format("SELECT count(*) FROM %s WHERE course_code='%s' AND grade<>'F' AND grade<>'NA' AND semester<> %d",tabname,code,currsem);
+        Statement stmt=connection.createStatement();
+        ResultSet result=stmt.executeQuery(qry);
+        while(result.next())
+        {
+            count=result.getInt("count");
+        }
+        if(count>=1)
+            return false;
+        else
+        {
+            Integer count2=0;
+            String qry2=String .format("SELECT count(*) FROM %s WHERE course_code='%s' AND grade='NA' AND semester=%d",tabname,code,currsem);
+            Statement stmt2=connection.createStatement();
+            ResultSet result2=stmt.executeQuery(qry);
+            while(result2.next())
+            {
+                count2=result2.getInt("count");
+            }
+            if(count2>0)
+                return false;
+            else
+                return true;
+        }
+
+    }
     public void view_grades(Connection connection,String username) throws SQLException, IOException {
         System.out.println("Enter the Semester you wanna see grades\n");
         Scanner s = new Scanner(System.in);
-
-        // Read the next integer from the screen
        int sem = s.nextInt();
 
-        System.out.println(sem);
+//        System.out.println(sem);
         String tabname = 's' + username;
         String temp = "";
         String qry = String.format("SELECT course_code,grade FROM %s WHERE semester=%d ", tabname, sem);
@@ -30,12 +57,12 @@ public class students {
                 System.out.print(res.getString(i) + " ");
 
             }
-            System.out.println("\n");//Move to the next line to print the next row.
+            System.out.println("\n\n");//Move to the next line to print the next row.
         }
     }
     public void deregisterCourse(Connection connection,String username) throws IOException, SQLException {
 
-        System.out.println("Enter the Course code and instructor You want to enroll\n");
+        System.out.println("Enter the Course code and instructor You want to drop\n");
         BufferedReader cc=new BufferedReader(new InputStreamReader(System.in));
         String code=cc.readLine();
         String inst=cc.readLine();
@@ -94,10 +121,10 @@ public class students {
         if(prereq.length==1 && prereq[0].equals(""))
             return true;
 //        System.out.println(prereq.length);
-        for(int i=0;i< prereq.length;i++)
-        {
-            System.out.println(prereq[i]);
-        }
+//        for(int i=0;i< prereq.length;i++)
+//        {
+//            System.out.println(prereq[i]);
+//        }
         for(int i=0;i< prereq.length;i++)
         {
             int count2=0;
@@ -212,7 +239,8 @@ public class students {
          {
             credit= rst.getString(1);
             grade= rst.getString(2);
-            cred=credit.charAt(6);
+            String[] cre=credit.split("-");
+            cred=Double.parseDouble(cre[4]);
             totalcred+=cred;
 
             if(grade.equals("A"))
@@ -252,6 +280,7 @@ public class students {
          if(totalcred==0.0)
              return 0.0;
          double result=sgpa/totalcred;
+
          return result;
     }
     public boolean isminSemCompleted(Connection connection,String username,String code) throws SQLException {
@@ -305,9 +334,10 @@ public class students {
         academicOffice acaoff=new academicOffice();
 
         String srecord='s'+username;
-
+        System.out.println("Select the course from below list ot register\n");
         System.out.println("----------------------------------------------------------------------------------------------------------\n");
-        String qry="SELECT * FROM course_offering ;";
+//        System.out.println("CODE    INSTRUCTOR  CGPA_REQUIRED    MINSEM_REQUIRED    CORE    ELECTIVES\n");
+        String qry="SELECT course_code,instructor,cgpa_const,minsem_req,core,elective FROM course_offering ;";
         Statement st = connection.createStatement();
         ResultSet res = st.executeQuery(qry);
         ResultSetMetaData rsmd = res.getMetaData();
@@ -315,7 +345,7 @@ public class students {
         while (res.next()) {
             for(int i = 1 ; i <= columnsNumber; i++){
 
-                System.out.print(res.getString(i) + " ");
+                System.out.print(res.getString(i) + "   ");
 
             }
             System.out.println("\n");
@@ -330,13 +360,15 @@ public class students {
 
         Integer syr=0;
         Integer currsem=0;
+        String department="";
         String studentName="";
         Statement sts=connection.createStatement();
-        String q=String.format("SELECT entryyr,name FROM students WHERE entry_no='%s'",username);
+        String q=String.format("SELECT entryyr,name,dept FROM students WHERE entry_no='%s'",username);
         ResultSet rst=sts.executeQuery(q);
         while(rst.next()) {
             syr = rst.getInt("entryyr");
             studentName=rst.getString("name");
+            department=rst.getString("dept");
         }
 //                System.out.println(syr);
 
@@ -352,68 +384,104 @@ public class students {
             cgpa_req = rst2.getDouble("cgpa_const");
             instabname=rst2.getString("username");
         }
-//        System.out.println(cgpa_req);
 
-        if(isCourseFloated(connection,code,inst))
+        String core="";
+        String elective="";
+        String qery=String.format("SELECT core,elective FROM coreelective as ce WHERE ce.course_code='%s'",code);
+        Statement state=connection.createStatement();
+        ResultSet result=state.executeQuery(qery);
+        while(result.next())
         {
-            if(acaoff.regDreg==1)
-            {
-                if(isminSemCompleted(connection,username,code))
-                {
-//                    System.out.println(currsem==1 || (currsem!=1 && cgpa_calculate(connection,username)>=cgpa_req));
-                    if(currsem==1 || (currsem!=1 && cgpa_calculate(connection,username)>=cgpa_req))
-                    {
-                        if(ispreRequisites(connection,code,username,currsem))
-                        {
-                            if(isCreditCriteria(connection,username,currsem,code))
-                            {
-                                String course_name = "";
-                                Statement sts3 = connection.createStatement();
-                                String q4 = String.format("SELECT course_name from course_catalog where course_code='%s'", code);
-                                ResultSet rst3 = sts3.executeQuery(q4);
-                                while (rst3.next()) {
-                                    course_name = rst3.getString("course_name");
+            core=result.getString("core");
+            elective=result.getString("elective");
+        }
+        core=core.replace("}","");
+        core=core.replace("{","");
+
+        String[] coreBranches=core.split(",");
+        elective=elective.replace("}","");
+        elective=elective.replace("{","");
+
+        String[] elecBranches=elective.split(",");
+
+        boolean iscore=false;
+        boolean iselective=false;
+
+        for(int i=0;i<coreBranches.length;i++)
+        {
+            if(coreBranches[i].equals(department)) {
+                iscore = true;
+                break;
+            }
+        }
+        for(int i=0;i<elecBranches.length;i++)
+        {
+            if(elecBranches[i].equals(department)) {
+                iselective = true;
+                break;
+            }
+        }
+
+        if(isCourseFloated(connection,code,inst)) {
+            if (idNotAreadyCompleted(connection, username, code,currsem)) {
+                if (acaoff.regDreg == 1) {
+                    if (isminSemCompleted(connection, username, code)) {
+                        if (currsem == 1 || (currsem != 1 && cgpa_calculate(connection, username) >= cgpa_req)) {
+                            if (ispreRequisites(connection, code, username, currsem)) {
+                                if (isCreditCriteria(connection, username, currsem, code)) {
+
+                                    if (iscore || iselective) {
+                                        String course_name = "";
+                                        Statement sts3 = connection.createStatement();
+                                        String q4 = String.format("SELECT course_name from course_catalog where course_code='%s'", code);
+                                        ResultSet rst3 = sts3.executeQuery(q4);
+                                        while (rst3.next()) {
+                                            course_name = rst3.getString("course_name");
+                                        }
+
+                                        String q3 = String.format("insert into %s values(?,?,?,?,?)", srecord);
+                                        PreparedStatement pstmt = connection.prepareStatement(q3);
+                                        pstmt.setString(1, code);
+                                        pstmt.setString(2, course_name);
+                                        pstmt.setInt(3, currsem);
+                                        pstmt.setString(4, "NA");
+                                        if (iscore)
+                                            pstmt.setString(5, "core");
+                                        else if (iselective)
+                                            pstmt.setString(5, "elective");
+                                        pstmt.execute();
+                                        pstmt.close();
+
+                                        String qinst = String.format("INSERT INTO %s VALUES(?,?,?)", instabname);
+                                        PreparedStatement pstmt2 = connection.prepareStatement(qinst);
+                                        pstmt2.setString(1, code);
+                                        pstmt2.setString(2, studentName);
+                                        pstmt2.setString(3, username);
+                                        pstmt2.execute();
+                                        pstmt2.close();
+
+                                    } else {
+                                        System.out.println("This course is not floated for your Branch\n");
+                                    }
+                                } else {
+                                    System.out.println("You can't enroll this course.. Credit limit Exceeded\n");
                                 }
-
-                                String q3 = String.format("insert into %s values(?,?,?,?,?)", srecord);
-                                PreparedStatement pstmt = connection.prepareStatement(q3);
-                                pstmt.setString(1, code);
-                                pstmt.setString(2, course_name);
-                                pstmt.setInt(3, currsem);
-                                pstmt.setString(4, "NA");
-                                pstmt.setString(5, "core");
-                                pstmt.execute();
-                                pstmt.close();
-
-                                String qinst=String.format("INSERT INTO %s VALUES(?,?,?)",instabname);
-                                PreparedStatement pstmt2=connection.prepareStatement(qinst);
-                                pstmt2.setString(1,code);
-                                pstmt2.setString(2,studentName);
-                                pstmt2.setString(3,username);
-                                pstmt2.execute();
-                                pstmt2.close();
-
-
+                            } else {
+                                System.out.println("You haven't completed the preRequisites for this course\n");
                             }
-                            else{
-                                System.out.println("You can't enroll this course.. Credit limit Exceeded\n");
-                            }
+                        } else {
+                            System.out.println("CGPA criteria is not fulfilled\n");
                         }
-                        else{
-                            System.out.println("You haven't completed the preRequisites for this course\n");
-                        }
+                    } else {
+                        System.out.println("You haven't completed the minimum semester required for this course\n");
                     }
-                    else {
-                        System.out.println("CGPA criteria is not fulfilled\n");
-                    }
-                }
-                else {
-                    System.out.println("You haven't completed the minimum semester required for this course\n");
-                }
 
+                } else {
+                    System.out.println("Course enroll and drop window is not open\n");
+                }
             }
             else {
-                System.out.println("Course enroll and drop window is not open\n");
+                System.out.println("you have either passed this course or already registered for this course\n");
             }
         }
         else
