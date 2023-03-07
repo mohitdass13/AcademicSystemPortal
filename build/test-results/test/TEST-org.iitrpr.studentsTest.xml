@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.iitrpr.studentsTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2023-03-07T12:44:02" hostname="mohit-HP-Pavilion-Laptop-14-dv2xxx" time="0.371">
+  <properties/>
+  <testcase name="idNotAreadyCompleted()" classname="org.iitrpr.studentsTest" time="0.067"/>
+  <testcase name="isCourseFloated()" classname="org.iitrpr.studentsTest" time="0.001"/>
+  <testcase name="view_grades()" classname="org.iitrpr.studentsTest" time="0.006"/>
+  <testcase name="isminSemCompleted()" classname="org.iitrpr.studentsTest" time="0.0"/>
+  <testcase name="isCreditCriteria()" classname="org.iitrpr.studentsTest" time="0.001"/>
+  <testcase name="enroll_course()" classname="org.iitrpr.studentsTest" time="0.001"/>
+  <testcase name="ispreRequisites()" classname="org.iitrpr.studentsTest" time="0.003"/>
+  <testcase name="deregisterCourse()" classname="org.iitrpr.studentsTest" time="0.003"/>
+  <testcase name="cgpa_calculate()" classname="org.iitrpr.studentsTest" time="0.001"/>
+  <system-out><![CDATA[Connected to Postgres Server Successfully !!
+Connected to Postgres Server Successfully !!
+Connected to Postgres Server Successfully !!
+1
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

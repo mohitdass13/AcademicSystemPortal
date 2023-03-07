@@ -36,7 +36,8 @@ public class instructor {
         }
 
     }
-    public void coursesOffered(Connection connection,String username) throws SQLException {
+    public String coursesOffered(Connection connection,String username) throws SQLException {
+        String toreturn="";
         String name = "";
         String query = String.format("SELECT name FROM users WHERE username='%s'", username);
         Statement stmt = connection.createStatement();
@@ -55,15 +56,17 @@ public class instructor {
             for (int i = 1; i <= columnsNumber; i++) {
 
                 System.out.print(res.getString(i) + " ");
+                toreturn+=res.getString(i)+" ";
 
             }
             System.out.println("\n");//Move to the next line to print the next row.
-
+            toreturn+="\n";
         }
-
+       return toreturn;
 
     }
-    public void viewGrades(Connection connection,String username) throws IOException, SQLException {
+    public String  viewGrades(Connection connection,String username) throws IOException, SQLException {
+        String toreturn="";
         System.out.println("Enter the Entry No. of the Student You wanna see the grades\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
         String entryno=reader.readLine();
@@ -94,16 +97,20 @@ public class instructor {
                 for (int i = 1; i <= columnsNumber; i++) {
 
                     System.out.print(res.getString(i) + " ");
+                    toreturn+=res.getString(i)+" ";
 
                 }
 
 
                 System.out.println("\n");//Move to the next line to print the next row.
+                toreturn+="\n";
 
             }
+            return toreturn;
         }
         else {
             System.out.println("This Student doesn't exists .. Please Enter the correct entry no\n");
+            return "This Student doesn't exists .. Please Enter the correct entry no\n";
         }
 
     }
@@ -139,6 +146,10 @@ public class instructor {
                 PreparedStatement pstmt=connection.prepareStatement(qry);
                 pstmt.execute();
                 pstmt.close();
+                String qry4=String.format("DELETE FROM %s WHERE course_code='%s'",username,code);
+                PreparedStatement pstmt4=connection.prepareStatement(qry4);
+                pstmt4.execute();
+                pstmt4.close();
                 System.out.println("Course DeRegistered Successfully\n");
             }
             else{
@@ -157,8 +168,8 @@ public class instructor {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String code = reader.readLine();
         System.out.println("enter cgpa criteria\n");
-        Scanner scan = new Scanner(System.in);
-        double cgpa_const = scan.nextDouble();
+        String cgp=reader.readLine();
+        double cgpa_const =Double.parseDouble(cgp);
 
         boolean isexist = false;
         Integer count2 = 0;

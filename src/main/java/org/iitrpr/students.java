@@ -38,8 +38,10 @@ public class students {
     }
     public void view_grades(Connection connection,String username) throws SQLException, IOException {
         System.out.println("Enter the Semester you wanna see grades\n");
-        Scanner s = new Scanner(System.in);
-       int sem = s.nextInt();
+        BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
+        String semester= bfr.readLine();
+//        System.out.println(semester);
+       int sem =Integer.parseInt(semester);
 
 //        System.out.println(sem);
         String tabname = 's' + username;
@@ -57,10 +59,10 @@ public class students {
                 System.out.print(res.getString(i) + " ");
 
             }
-            System.out.println("\n\n");//Move to the next line to print the next row.
+            System.out.println("\n");//Move to the next line to print the next row.
         }
     }
-    public void deregisterCourse(Connection connection,String username) throws IOException, SQLException {
+    public boolean deregisterCourse(Connection connection,String username) throws IOException, SQLException {
 
         System.out.println("Enter the Course code and instructor You want to drop\n");
         BufferedReader cc=new BufferedReader(new InputStreamReader(System.in));
@@ -97,6 +99,7 @@ public class students {
         {
             System.out.println("This course is not floated\n");
         }
+        return true;
 
     }
 
