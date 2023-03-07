@@ -70,26 +70,73 @@ class studentsTest {
     void ispreRequisites() throws SQLException {
         boolean check=student.ispreRequisites(connection,"CS304","2020CSB1098",1);
         assertEquals(true,check);
+         check=student.ispreRequisites(connection,"CS303","2020CSB1098",1);
+        assertEquals(false,check);
 
     }
 
     @Test
-    void isCreditCriteria() {
+    void isCreditCriteria() throws SQLException {
+         boolean check= student.isCreditCriteria(connection,"2020csb1098",1,"CS305");
+         assertEquals(true,check);
+        check= student.isCreditCriteria(connection,"2020csb1098",1,"HS104");
+        assertEquals(true,check);
+        check= student.isCreditCriteria(connection,"2020csb1098",1,"HS103");
+        assertEquals(true,check);
+
     }
 
     @Test
-    void cgpa_calculate() {
+    void cgpa_calculate() throws SQLException {
+        double gpa=student.cgpa_calculate(connection,"2020csb1098");
+        assertEquals(8.909090909090908,gpa);
+
     }
 
     @Test
-    void isminSemCompleted() {
+    void isminSemCompleted() throws SQLException {
+        boolean check=student.isminSemCompleted(connection,"2020csb1098","HS104");
+        assertEquals(true,check);
+        check=student.isminSemCompleted(connection,"2020csb1098","CS203");
+        assertEquals(true,check);
     }
 
     @Test
-    void isCourseFloated() {
+    void isCourseFloated() throws SQLException {
+        boolean check=student.isCourseFloated(connection,"CS305","DR.GUNTURI");
+        assertEquals(true,check);
+        check=student.isCourseFloated(connection,"CS306","DR.GUNTURI");
+        assertEquals(false,check);
     }
 
     @Test
-    void enroll_course() {
+    void enroll_course() throws SQLException, IOException {
+        String input="CS305\n" +
+                "DR.GUNTURI\n";
+        InputStream in=new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
+        boolean check=student.enroll_course(connection,"2020CSB1098");
+
+        assertEquals(false,check);
+        input="HS103\n" +
+                "DR.GUNTURI\n";
+
+        in=new ByteArrayInputStream(input.getBytes());
+        System.setIn(in);
+        check=student.enroll_course(connection,"2020CSB1098");
+        assertEquals(true,check);
+
+//        input="HS103\n" +
+//                "DR.GUNTURI\n";
+//
+//        in=new ByteArrayInputStream(input.getBytes());
+//        System.setIn(in);
+//        check=student.enroll_course(connection,"2020CSB1098");
+//        assertEquals(false,check);
+
+
+
+
+
     }
 }

@@ -1,5 +1,7 @@
 package org.iitrpr;
 
+import org.w3c.dom.ls.LSOutput;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,8 +18,11 @@ public class academicOffice {
     public int floatInst=1;
     public int year=2020;
     public int sem=1;
+
     public void startNewSemester(Connection connection)
     {
+        System.out.println(year);
+        System.out.println(sem);
         if(sem==1)
             sem++;
         else if(sem==2)

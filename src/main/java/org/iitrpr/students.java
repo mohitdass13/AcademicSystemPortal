@@ -147,6 +147,8 @@ public class students {
     }
     public boolean isCreditCriteria(Connection connection,String username,int currsem,String code) throws SQLException {
         String tabname='s'+username;
+        System.out.println(currsem+2);
+        System.out.println(code);
         if(currsem<=2)
         {
             String credit_strct="";
@@ -158,7 +160,8 @@ public class students {
             {
 
                 credit_strct= rst1.getString("credit_strct");
-                totalCredit+=Integer.parseInt(String.valueOf(credit_strct.charAt(6)));
+                String[] cr1=credit_strct.split("-");
+                totalCredit+=Double.parseDouble(cr1[4]);
             }
             String qry4=String.format("SELECT credit_strct FROM course_catalog as cg WHERE cg.course_code='%s'",code);
             Statement stmt4=connection.createStatement();
@@ -167,7 +170,8 @@ public class students {
             {
 
                 credit_strct= rst4.getString("credit_strct");
-                totalCredit+=Integer.parseInt(String.valueOf(credit_strct.charAt(6)));
+                String[] cr2=credit_strct.split("-");
+                totalCredit+=Double.parseDouble(cr2[4]);
             }
 
             if(totalCredit<=18)
@@ -187,7 +191,8 @@ public class students {
             while (rst.next()) {
 
                 credit = rst.getString("credit_strct");
-                sum += Integer.parseInt(String.valueOf(credit.charAt(6)));
+                String[] cr3=credit.split("-");
+                sum += Double.parseDouble(cr3[4]);
             }
             int curr2 = currsem - 2;
             String qry2 = String.format("SELECT credit_strct FROM course_catalog as cg,%s as sr WHERE sr.course_code=cg.course_code AND sr.semester=%d", tabname, curr2);
@@ -196,7 +201,8 @@ public class students {
             while (rst2.next()) {
 
                 credit = rst2.getString("credit_strct");
-                sum += Integer.parseInt(String.valueOf(credit.charAt(6)));
+                String[] cr4=credit.split("-");
+                sum += Double.parseDouble(cr4[4]);
             }
             String credit_strct2="";
             double totalCredit2=0.0;
@@ -207,7 +213,8 @@ public class students {
             {
 
                 credit_strct2= rst3.getString("credit_strct");
-                totalCredit2+=Integer.parseInt(String.valueOf(credit_strct2.charAt(6)));
+                String[] cr5=credit_strct2.split("-");
+                totalCredit2+=Double.parseDouble(cr5[4]);
             }
             String qry5=String.format("SELECT credit_strct FROM course_catalog as cg WHERE cg.course_code='%s'",code);
             Statement stmt5=connection.createStatement();
@@ -216,7 +223,8 @@ public class students {
             {
 
                 credit_strct2= rst5.getString("credit_strct");
-                totalCredit2+=Integer.parseInt(String.valueOf(credit_strct2.charAt(6)));
+                String[] cr6=credit_strct2.split("-");
+                totalCredit2+=Double.parseDouble(cr6[4]);
             }
             if(totalCredit2<=(1.25*(sum/2.0)))
                 return true;
@@ -331,7 +339,7 @@ public class students {
 
         return false;
     }
-    public void enroll_course(Connection connection,String username)throws IOException, SQLException
+    public boolean enroll_course(Connection connection,String username)throws IOException, SQLException
     {
 
         academicOffice acaoff=new academicOffice();
@@ -462,34 +470,43 @@ public class students {
                                         pstmt2.setString(3, username);
                                         pstmt2.execute();
                                         pstmt2.close();
+                                        return true;
 
                                     } else {
                                         System.out.println("This course is not floated for your Branch\n");
+                                        return false;
                                     }
                                 } else {
                                     System.out.println("You can't enroll this course.. Credit limit Exceeded\n");
+                                    return false;
                                 }
                             } else {
                                 System.out.println("You haven't completed the preRequisites for this course\n");
+                                return false;
                             }
                         } else {
                             System.out.println("CGPA criteria is not fulfilled\n");
+                            return false;
                         }
                     } else {
                         System.out.println("You haven't completed the minimum semester required for this course\n");
+                        return false;
                     }
 
                 } else {
                     System.out.println("Course enroll and drop window is not open\n");
+                    return false;
                 }
             }
             else {
                 System.out.println("you have either passed this course or already registered for this course\n");
+                return false;
             }
         }
         else
         {
             System.out.println("This course is not floated\n");
+            return false;
         }
 
     }
