@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>databaseSeeder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">academicSystem</a> &gt; <a href="index.source.html" class="el_package">org.iitrpr</a> &gt; <span class="el_source">databaseSeeder.java</span></div><h1>databaseSeeder.java</h1><pre class="source lang-java linenums">package org.iitrpr;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.*;
+import java.util.Locale;
+import java.util.Scanner;
+
+<span class="fc" id="L11">public class databaseSeeder {</span>
+<span class="fc" id="L12">    private final String url = &quot;jdbc:postgresql://localhost:5432/academicsystem&quot;;</span>
+<span class="fc" id="L13">    private final String user=&quot;postgres&quot;;</span>
+<span class="fc" id="L14">    private final String password=&quot;12345&quot;;</span>
+
+    public Connection connect()
+    {
+<span class="fc" id="L18">        Connection cnct =null;</span>
+        try{
+<span class="fc" id="L20">            cnct = DriverManager.getConnection(url,user,password);</span>
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">            if(cnct!=null)</span>
+<span class="fc" id="L22">                System.out.println(&quot;Connected to Postgres Server Successfully !!&quot;);</span>
+            else
+<span class="nc" id="L24">                System.out.println(&quot;Sorry.......Failed to make Connection&quot;);</span>
+        }
+<span class="nc" id="L26">        catch(SQLException e)</span>
+        {
+<span class="nc" id="L28">            System.out.println(e.getMessage());</span>
+<span class="fc" id="L29">        }</span>
+<span class="fc" id="L30">        return cnct;</span>
+    }
+    public void generateSchema(Connection connection)
+    {
+        try
+        {
+<span class="nc" id="L36">            String query=&quot;&quot;;</span>
+            try{
+<span class="nc" id="L38">                File file = new File(&quot;./SQL/acadSQL.sql&quot;);</span>
+<span class="nc" id="L39">                Scanner scan = new Scanner(file);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">                while(scan.hasNextLine())</span>
+                {
+<span class="nc" id="L42">                    query=query.concat(scan.nextLine()+&quot; &quot;);</span>
+                }
+<span class="nc" id="L44">                scan.close();</span>
+            }
+<span class="nc" id="L46">            catch(IOException e)</span>
+            {
+<span class="nc" id="L48">                System.out.println(e.getLocalizedMessage());</span>
+<span class="nc" id="L49">            }</span>
+<span class="nc" id="L50">            Statement stmt= connection.createStatement();</span>
+<span class="nc" id="L51">            stmt.execute(query);</span>
+<span class="nc" id="L52">            stmt.close();</span>
+        }
+<span class="nc" id="L54">        catch(SQLException e)</span>
+        {
+<span class="nc" id="L56">            System.out.println(e.getMessage());</span>
+<span class="nc" id="L57">        }</span>
+<span class="nc" id="L58">    }</span>
+   public void dataseeder(Connection connection)
+   {
+<span class="nc" id="L61">        String file=&quot;./src/datafeed/studentssss.csv&quot;;</span>
+<span class="nc" id="L62">       BufferedReader read = null;</span>
+<span class="nc" id="L63">       String line=&quot;&quot;;</span>
+       try{
+<span class="nc" id="L65">           read=new BufferedReader(new FileReader(file));</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">           while((line= read.readLine())!=null)</span>
+           {
+<span class="nc" id="L68">               String[] row=line.split(&quot;,&quot;);</span>
+<span class="nc" id="L69">               String name=row[0];</span>
+<span class="nc" id="L70">               String entry_no=row[2].toLowerCase();</span>
+<span class="nc" id="L71">               String emailid=row[1];</span>
+<span class="nc" id="L72">               String dept=row[3];</span>
+<span class="nc" id="L73">               Integer entryyr=Integer.parseInt(row[4]);</span>
+<span class="nc" id="L74">               academicOffice acaoff=new academicOffice();</span>
+<span class="nc" id="L75">               acaoff.addStudent(connection,name,emailid,entry_no,dept,entryyr);</span>
+
+<span class="nc" id="L77">           }</span>
+<span class="nc" id="L78">       }catch(Exception e)</span>
+       {
+<span class="nc" id="L80">            e.printStackTrace();</span>
+       }finally {
+           try{
+<span class="nc" id="L83">                      read.close();</span>
+<span class="nc" id="L84">           }catch (IOException e)</span>
+           {
+<span class="nc" id="L86">               e.printStackTrace();</span>
+<span class="nc" id="L87">           }</span>
+       }
+<span class="nc" id="L89">   }</span>
+    public void userseeder(Connection connection)
+    {
+<span class="nc" id="L92">        String file=&quot;./src/datafeed/users.csv&quot;;</span>
+<span class="nc" id="L93">        BufferedReader read = null;</span>
+<span class="nc" id="L94">        String line=&quot;&quot;;</span>
+        try{
+<span class="nc" id="L96">            read=new BufferedReader(new FileReader(file));</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            while((line= read.readLine())!=null)</span>
+            {
+<span class="nc" id="L99">                String[] row=line.split(&quot;,&quot;);</span>
+<span class="nc" id="L100">                String username=row[0];</span>
+<span class="nc" id="L101">                String pass=row[1];</span>
+<span class="nc" id="L102">                String name=row[2];</span>
+<span class="nc" id="L103">                String role=row[3];</span>
+
+<span class="nc" id="L105">                PreparedStatement pstmt=connection.prepareStatement(&quot;INSERT INTO users VALUES(?,?,?,?)&quot;);</span>
+<span class="nc" id="L106">                pstmt.setString(1,username);</span>
+<span class="nc" id="L107">                pstmt.setString(2,pass);</span>
+<span class="nc" id="L108">                pstmt.setString(3,name);</span>
+<span class="nc" id="L109">                pstmt.setString(4,role);</span>
+<span class="nc" id="L110">                pstmt.execute();</span>
+<span class="nc" id="L111">                pstmt.close();</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                if(role.equals(&quot;instructor&quot;))</span>
+                {
+<span class="nc" id="L115">                    String qry=String.format(&quot;CREATE TABLE %s (course_code VARCHAR(6),student_name VARCHAR(50),entry_no VARCHAR(12))&quot;,username);</span>
+<span class="nc" id="L116">                    PreparedStatement pstmt2=connection.prepareStatement(qry);</span>
+<span class="nc" id="L117">                    pstmt2.execute();</span>
+<span class="nc" id="L118">                    pstmt2.close();</span>
+                }
+<span class="nc" id="L120">            }</span>
+<span class="nc" id="L121">        }catch(Exception e)</span>
+        {
+<span class="nc" id="L123">            e.printStackTrace();</span>
+        }finally {
+            try{
+<span class="nc" id="L126">                read.close();</span>
+<span class="nc" id="L127">            }catch (IOException e)</span>
+            {
+<span class="nc" id="L129">                e.printStackTrace();</span>
+<span class="nc" id="L130">            }</span>
+        }
+<span class="nc" id="L132">    }</span>
+    public static void main(String[] args) {
+
+<span class="nc" id="L135">        databaseSeeder dbs=new databaseSeeder();</span>
+<span class="nc" id="L136">        Connection connection= dbs.connect();</span>
+<span class="nc" id="L137">        dbs.generateSchema(connection);</span>
+<span class="nc" id="L138">        dbs.dataseeder(connection);</span>
+<span class="nc" id="L139">        dbs.userseeder(connection);</span>
+<span class="nc" id="L140">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

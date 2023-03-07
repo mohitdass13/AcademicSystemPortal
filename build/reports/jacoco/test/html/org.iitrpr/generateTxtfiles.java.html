@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>generateTxtfiles.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">academicSystem</a> &gt; <a href="index.source.html" class="el_package">org.iitrpr</a> &gt; <span class="el_source">generateTxtfiles.java</span></div><h1>generateTxtfiles.java</h1><pre class="source lang-java linenums">package org.iitrpr;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+<span class="fc" id="L7">public class generateTxtfiles {</span>
+    public static void generateTranscript(String entryNo, String Transcript) {
+<span class="fc" id="L9">        String home = System.getProperty(&quot;user.home&quot;);</span>
+<span class="fc" id="L10">        String os = System.getProperty(&quot;os.name&quot;).toLowerCase();</span>
+        String dDir;
+<span class="pc bpc" id="L12" title="1 of 2 branches missed.">        if (os.contains(&quot;win&quot;)) {</span>
+<span class="nc" id="L13">            dDir = &quot;\\Documents\\AcademicSystem\\&quot;;</span>
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        } else if (os.contains(&quot;mac&quot;)) {</span>
+<span class="nc" id="L15">            dDir = &quot;/Documents/AcademicSystem/&quot;;</span>
+        } else {
+<span class="fc" id="L17">            dDir = &quot;/Documents/AcademicSystem/&quot;;</span>
+        }
+
+<span class="fc" id="L20">        String fullPath = home + dDir + &quot;Transcripts/&quot;;</span>
+<span class="fc" id="L21">        File folder = new File(fullPath);</span>
+<span class="fc" id="L22">        folder.mkdirs();</span>
+<span class="fc" id="L23">        String fileName = String.format(&quot;%s_Transcript&quot;, entryNo);</span>
+<span class="fc" id="L24">        File file = new File(fullPath + fileName + &quot;.txt&quot;);</span>
+
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (file.exists()) {</span>
+<span class="fc" id="L27">            int i = 1;</span>
+            do {
+<span class="fc" id="L29">                file = new File(fullPath + fileName + &quot;(&quot; + i + &quot;).txt&quot;);</span>
+<span class="fc" id="L30">                i++;</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">            } while (file.exists());</span>
+        }
+
+
+        try {
+<span class="fc" id="L36">            boolean success = file.createNewFile();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (success) {</span>
+            } else {
+            }
+<span class="nc" id="L40">        } catch (IOException e) {</span>
+<span class="nc" id="L41">            System.out.println(&quot;An error occurred while creating the file.&quot;);</span>
+<span class="nc" id="L42">            e.printStackTrace();</span>
+<span class="fc" id="L43">        }</span>
+
+<span class="fc" id="L45">        FileWriter writer = null;</span>
+        try {
+<span class="fc" id="L47">            writer = new FileWriter(file);</span>
+<span class="fc" id="L48">            writer.write(Transcript);</span>
+
+<span class="fc" id="L50">            writer.close();</span>
+<span class="nc" id="L51">        } catch (IOException e) {</span>
+<span class="nc" id="L52">            throw new RuntimeException(e);</span>
+<span class="fc" id="L53">        }</span>
+<span class="fc" id="L54">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

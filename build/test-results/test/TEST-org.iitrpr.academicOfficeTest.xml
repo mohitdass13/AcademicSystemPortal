@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.iitrpr.academicOfficeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2023-03-07T06:06:27" hostname="mohit-HP-Pavilion-Laptop-14-dv2xxx" time="1.913">
+  <properties/>
+  <testcase name="viewGradesAll()" classname="org.iitrpr.academicOfficeTest" time="0.277"/>
+  <testcase name="generateTranscripts()" classname="org.iitrpr.academicOfficeTest" time="0.151"/>
+  <testcase name="addNewCourse()" classname="org.iitrpr.academicOfficeTest" time="0.173"/>
+  <testcase name="isGraduated()" classname="org.iitrpr.academicOfficeTest" time="0.026"/>
+  <testcase name="addStudent()" classname="org.iitrpr.academicOfficeTest" time="0.05"/>
+  <testcase name="startNewSemester()" classname="org.iitrpr.academicOfficeTest" time="0.008"/>
+  <testcase name="setEvent()" classname="org.iitrpr.academicOfficeTest" time="0.01"/>
+  <system-out><![CDATA[Connected to Postgres Server Successfully !!
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

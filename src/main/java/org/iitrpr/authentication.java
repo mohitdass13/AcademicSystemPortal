@@ -118,7 +118,7 @@ public class authentication {
                         BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
                         String option2 = rdr.readLine();
                         if (option2.equals("1")) {
-                            acoff.addNewCourse(connection);
+                            String res=acoff.addNewCourse(connection);
                         }
                         else if(option2.equals("2"))
                         {
@@ -142,7 +142,7 @@ public class authentication {
                         acoff.startNewSemester(connection);
                     }
                     else if(option.equals("6")) {
-                        acoff.isGraduated(connection);
+                        String out= acoff.isGraduated(connection);
                     }
                     else if(option.equals("7")) {
                         break;

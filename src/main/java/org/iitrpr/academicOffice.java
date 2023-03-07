@@ -18,8 +18,6 @@ public class academicOffice {
     public int sem=1;
     public void startNewSemester(Connection connection)
     {
-        System.out.println(year);
-        System.out.println(sem);
         if(sem==1)
             sem++;
         else if(sem==2)
@@ -27,8 +25,7 @@ public class academicOffice {
             year++;
             sem=1;
         }
-        System.out.println(year);
-        System.out.println(sem);
+
     }
     public void setEvent(Connection connection) throws IOException {
         System.out.println("1.Open Student course Add/Drop\n2.Open Faculty Course Add/Drop \n3.Close Student course Add/Drop\n4.Close faculty Course Add/Drop\n");
@@ -54,7 +51,7 @@ public class academicOffice {
         }
 
     }
-    public void isGraduated(Connection connection) throws IOException, SQLException {
+    public String isGraduated(Connection connection) throws IOException, SQLException {
         System.out.println("Enter the entry no\n");
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String entryNO=bfr.readLine();
@@ -104,15 +101,16 @@ public class academicOffice {
         if(coreCredits>=4 && electiveCredits>=1.5 && isCapstoneDone)
         {
             System.out.println("Yes!!!     This Guy is able to be graduate\n");
+            return "Yes!!!     This Guy is able to be graduate";
         }
         else {
             System.out.println("NO!!! This guy has not completed the required credits for graduation\n");
+            return "NO!!! This guy has not completed the required credits for graduation";
         }
 
     }
 
-    public void addNewCourse(Connection connection) throws SQLException, IOException {
-        Scanner scan=new Scanner(new InputStreamReader(System.in));
+    public String addNewCourse(Connection connection) throws SQLException, IOException {
         System.out.println("Enter course code\n");
         BufferedReader reader2=new BufferedReader(new InputStreamReader(System.in));
         String Coursecode=reader2.readLine();
@@ -123,14 +121,16 @@ public class academicOffice {
         System.out.println("Enter Prerequisites\n");
         String preReq=reader2.readLine();
         System.out.println("Enter minimum semester required to register the course\n");
-        Integer minsem= scan.nextInt();
+        String minsemester= reader2.readLine();
         System.out.println("Enter the batch onwards\n");
-        Integer batch=scan.nextInt();
+        String batchS=reader2.readLine();
         System.out.println("Enter the branches for which this course would be program core\n");
         String core=reader2.readLine();
         System.out.println("Enter the branches for which this course is elective\n");
         String elective=reader2.readLine();
 
+        Integer minsem=Integer.parseInt(minsemester);
+        Integer batch=Integer.parseInt(batchS);
         preReq=preReq.replace("\"","");
         String[] pre = preReq.split(",");
 
@@ -186,16 +186,18 @@ public class academicOffice {
         pstmt2.execute();
         pstmt2.close();
 
+        return "Course Added Succesfully";
+
     }
-    public void generateTranscripts(Connection connection) throws IOException, SQLException {
-        Scanner scan=new Scanner(System.in);
+    public String generateTranscripts(Connection connection) throws IOException, SQLException {
         generateTxtfiles gtxt=new generateTxtfiles();
         String Transcript="";
         System.out.println("Enter the Entry NO of the Student\n");
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String entryNo=bfr.readLine();
         System.out.println("Enter the semester for which you want to generate transcript:\n");
-        Integer sem= scan.nextInt();
+        String semester= bfr.readLine();
+        Integer sem=Integer.parseInt(semester);
         System.out.println(sem);
         entryNo=entryNo.toLowerCase();
         String tabname='s'+entryNo;
@@ -288,9 +290,11 @@ public class academicOffice {
         System.out.println("\n\n");
         gtxt.generateTranscript(entryNo,Transcript);
 
+        return "Transcript generated Successfully";
+
     }
 
-    public void viewGradesAll(Connection connection) throws IOException, SQLException {
+    public String viewGradesAll(Connection connection) throws IOException, SQLException {
         System.out.println("Enter the Entry No. of the Student You wanna see the grades\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
         String entryno=reader.readLine();
@@ -330,10 +334,11 @@ public class academicOffice {
         else {
             System.out.println("This Student doesn't exists .. Please Enter the correct entry no\n");
         }
+        return "These are the grades";
 
     }
 
-    public void addStudent(Connection connection,String name,String email,String entryno,String dept,Integer entryyr) throws SQLException {
+    public String addStudent(Connection connection,String name,String email,String entryno,String dept,Integer entryyr) throws SQLException {
 
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO students VALUES(?, ?, ?, ?, ?)");
             pstmt.setString(1, name);
@@ -350,6 +355,9 @@ public class academicOffice {
             pstmt2.execute();
             pstmt2.close();
             System.out.println("Student Record Created Successfully!!");
+
+
+            return "Student Record Created Successfully!!";
 
         }
 

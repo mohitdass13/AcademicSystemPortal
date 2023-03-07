@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>students.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">academicSystem</a> &gt; <a href="index.source.html" class="el_package">org.iitrpr</a> &gt; <span class="el_source">students.java</span></div><h1>students.java</h1><pre class="source lang-java linenums">package org.iitrpr;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.*;
+import java.util.Scanner;
+
+<span class="nc" id="L9">public class students {</span>
+    public boolean idNotAreadyCompleted(Connection connection,String username,String code,Integer currsem) throws SQLException {
+<span class="nc" id="L11">        String tabname='s'+username;</span>
+<span class="nc" id="L12">        Integer count=0;</span>
+<span class="nc" id="L13">        String qry=String .format(&quot;SELECT count(*) FROM %s WHERE course_code='%s' AND grade&lt;&gt;'F' AND grade&lt;&gt;'NA' AND semester&lt;&gt; %d&quot;,tabname,code,currsem);</span>
+<span class="nc" id="L14">        Statement stmt=connection.createStatement();</span>
+<span class="nc" id="L15">        ResultSet result=stmt.executeQuery(qry);</span>
+<span class="nc bnc" id="L16" title="All 2 branches missed.">        while(result.next())</span>
+        {
+<span class="nc" id="L18">            count=result.getInt(&quot;count&quot;);</span>
+        }
+<span class="nc bnc" id="L20" title="All 2 branches missed.">        if(count&gt;=1)</span>
+<span class="nc" id="L21">            return false;</span>
+        else
+        {
+<span class="nc" id="L24">            Integer count2=0;</span>
+<span class="nc" id="L25">            String qry2=String .format(&quot;SELECT count(*) FROM %s WHERE course_code='%s' AND grade='NA' AND semester=%d&quot;,tabname,code,currsem);</span>
+<span class="nc" id="L26">            Statement stmt2=connection.createStatement();</span>
+<span class="nc" id="L27">            ResultSet result2=stmt.executeQuery(qry);</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">            while(result2.next())</span>
+            {
+<span class="nc" id="L30">                count2=result2.getInt(&quot;count&quot;);</span>
+            }
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            if(count2&gt;0)</span>
+<span class="nc" id="L33">                return false;</span>
+            else
+<span class="nc" id="L35">                return true;</span>
+        }
+
+    }
+    public void view_grades(Connection connection,String username) throws SQLException, IOException {
+<span class="nc" id="L40">        System.out.println(&quot;Enter the Semester you wanna see grades\n&quot;);</span>
+<span class="nc" id="L41">        Scanner s = new Scanner(System.in);</span>
+<span class="nc" id="L42">       int sem = s.nextInt();</span>
+
+//        System.out.println(sem);
+<span class="nc" id="L45">        String tabname = 's' + username;</span>
+<span class="nc" id="L46">        String temp = &quot;&quot;;</span>
+<span class="nc" id="L47">        String qry = String.format(&quot;SELECT course_code,grade FROM %s WHERE semester=%d &quot;, tabname, sem);</span>
+<span class="nc" id="L48">        Statement stmt = connection.createStatement();</span>
+<span class="nc" id="L49">        ResultSet res = stmt.executeQuery(qry);</span>
+<span class="nc" id="L50">        ResultSetMetaData rsmd = res.getMetaData();</span>
+
+<span class="nc" id="L52">        int columnsNumber = rsmd.getColumnCount();</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        while (res.next()) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            for (int i = 1; i &lt;= columnsNumber; i++) {</span>
+
+<span class="nc" id="L57">                System.out.print(res.getString(i) + &quot; &quot;);</span>
+
+            }
+<span class="nc" id="L60">            System.out.println(&quot;\n\n&quot;);//Move to the next line to print the next row.</span>
+        }
+<span class="nc" id="L62">    }</span>
+    public void deregisterCourse(Connection connection,String username) throws IOException, SQLException {
+
+<span class="nc" id="L65">        System.out.println(&quot;Enter the Course code and instructor You want to drop\n&quot;);</span>
+<span class="nc" id="L66">        BufferedReader cc=new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="nc" id="L67">        String code=cc.readLine();</span>
+<span class="nc" id="L68">        String inst=cc.readLine();</span>
+<span class="nc" id="L69">        String tabname='s'+username;</span>
+<span class="nc" id="L70">        int count=0;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if(isCourseFloated(connection,code,inst))</span>
+        {
+<span class="nc" id="L73">            String qry=String.format(&quot;SELECT count(*) FROM %s WHERE course_code='%s' AND grade='NA'&quot;,tabname,code);</span>
+<span class="nc" id="L74">            Statement stmt=connection.createStatement();</span>
+<span class="nc" id="L75">            ResultSet rst=stmt.executeQuery(qry);</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            while(rst.next())</span>
+            {
+<span class="nc" id="L79">                count= rst.getInt(&quot;count&quot;);</span>
+            }
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if(count==0)</span>
+            {
+<span class="nc" id="L83">                System.out.println(&quot;You are not enrolled in this course\n&quot;);</span>
+            }
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            else if(count==1)</span>
+            {
+<span class="nc" id="L87">                academicOffice acoff=new academicOffice();</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                if(acoff.regDreg==1)</span>
+                {
+<span class="nc" id="L90">                    String query=String.format(&quot;DELETE FROM %s WHERE course_code='%s'&quot;,tabname,code);</span>
+<span class="nc" id="L91">                    PreparedStatement pstmt=connection.prepareStatement(query);</span>
+<span class="nc" id="L92">                    pstmt.execute();</span>
+                }
+            }
+<span class="nc" id="L95">        }</span>
+        else
+        {
+<span class="nc" id="L98">            System.out.println(&quot;This course is not floated\n&quot;);</span>
+        }
+
+<span class="nc" id="L101">    }</span>
+
+    public boolean ispreRequisites(Connection connection,String code,String username,Integer currsem) throws SQLException {
+<span class="nc" id="L104">        String table='s'+username;</span>
+<span class="nc" id="L105">        int count=0;</span>
+<span class="nc" id="L106">        String[] prereq={};</span>
+<span class="nc" id="L107">        String regex=&quot;,&quot;;</span>
+<span class="nc" id="L108">        String qry=String.format(&quot;SELECT prerequisites FROM course_catalog where course_code='%s'&quot;,code);</span>
+<span class="nc" id="L109">        Statement stmt=connection.createStatement();</span>
+<span class="nc" id="L110">        ResultSet res= stmt.executeQuery(qry);</span>
+
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        while(res.next())</span>
+        {
+<span class="nc" id="L114">            String temp=res.getString(&quot;prerequisites&quot;);</span>
+<span class="nc" id="L115">            temp=temp.replace(&quot;{&quot;,&quot;&quot;);</span>
+<span class="nc" id="L116">            temp=temp.replace(&quot;}&quot;,&quot;&quot;);</span>
+
+<span class="nc" id="L118">            prereq=temp.split(regex);</span>
+<span class="nc" id="L119">        }</span>
+<span class="nc" id="L120">        String temp=&quot;&quot;;</span>
+<span class="nc bnc" id="L121" title="All 4 branches missed.">        if(prereq.length==1 &amp;&amp; prereq[0].equals(&quot;&quot;))</span>
+<span class="nc" id="L122">            return true;</span>
+//        System.out.println(prereq.length);
+//        for(int i=0;i&lt; prereq.length;i++)
+//        {
+//            System.out.println(prereq[i]);
+//        }
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        for(int i=0;i&lt; prereq.length;i++)</span>
+        {
+<span class="nc" id="L130">            int count2=0;</span>
+<span class="nc" id="L131">            temp=prereq[i];</span>
+<span class="nc" id="L132">            String qry2=String.format(&quot;SELECT count(*) as count FROM %s WHERE course_code='%s' AND grade&lt;&gt;'F' AND semester&lt;=%d&quot;,table,temp,currsem);</span>
+<span class="nc" id="L133">            Statement stmt2=connection.createStatement();</span>
+<span class="nc" id="L134">            ResultSet rst2=stmt2.executeQuery(qry2);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            while(rst2.next())</span>
+            {
+<span class="nc" id="L137">                count2=rst2.getInt(&quot;count&quot;);</span>
+            }
+<span class="nc bnc" id="L139" title="All 2 branches missed.">            if(count2==0)</span>
+<span class="nc" id="L140">                return false;</span>
+
+        }
+<span class="nc" id="L143">        return true;</span>
+    }
+    public boolean isCreditCriteria(Connection connection,String username,int currsem,String code) throws SQLException {
+<span class="nc" id="L146">        String tabname='s'+username;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if(currsem&lt;=2)</span>
+        {
+<span class="nc" id="L149">            String credit_strct=&quot;&quot;;</span>
+<span class="nc" id="L150">            double totalCredit=0.0;</span>
+<span class="nc" id="L151">            String qry1=String.format(&quot;SELECT credit_strct FROM course_catalog as cg,%s as sr WHERE sr.course_code=cg.course_code AND sr.semester=%d&quot;,tabname,currsem);</span>
+<span class="nc" id="L152">            Statement stmt1=connection.createStatement();</span>
+<span class="nc" id="L153">            ResultSet rst1= stmt1.executeQuery(qry1);</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            while(rst1.next())</span>
+            {
+
+<span class="nc" id="L157">                credit_strct= rst1.getString(&quot;credit_strct&quot;);</span>
+<span class="nc" id="L158">                totalCredit+=Integer.parseInt(String.valueOf(credit_strct.charAt(6)));</span>
+            }
+<span class="nc" id="L160">            String qry4=String.format(&quot;SELECT credit_strct FROM course_catalog as cg WHERE cg.course_code='%s'&quot;,code);</span>
+<span class="nc" id="L161">            Statement stmt4=connection.createStatement();</span>
+<span class="nc" id="L162">            ResultSet rst4= stmt4.executeQuery(qry4);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            while(rst4.next())</span>
+            {
+
+<span class="nc" id="L166">                credit_strct= rst4.getString(&quot;credit_strct&quot;);</span>
+<span class="nc" id="L167">                totalCredit+=Integer.parseInt(String.valueOf(credit_strct.charAt(6)));</span>
+            }
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            if(totalCredit&lt;=18)</span>
+<span class="nc" id="L171">                return true;</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">            else if(totalCredit&gt;18)</span>
+<span class="nc" id="L173">                return false;</span>
+<span class="nc" id="L174">        }</span>
+        else
+        {
+<span class="nc" id="L177">            double sum = 0.0;</span>
+<span class="nc" id="L178">            int curr = currsem - 1;</span>
+<span class="nc" id="L179">            String credit = &quot;&quot;;</span>
+
+<span class="nc" id="L181">            String qry = String.format(&quot;SELECT credit_strct FROM course_catalog as cg,%s as sr WHERE sr.course_code=cg.course_code AND sr.semester=%d&quot;, tabname, curr);</span>
+<span class="nc" id="L182">            Statement stmt = connection.createStatement();</span>
+<span class="nc" id="L183">            ResultSet rst = stmt.executeQuery(qry);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            while (rst.next()) {</span>
+
+<span class="nc" id="L186">                credit = rst.getString(&quot;credit_strct&quot;);</span>
+<span class="nc" id="L187">                sum += Integer.parseInt(String.valueOf(credit.charAt(6)));</span>
+            }
+<span class="nc" id="L189">            int curr2 = currsem - 2;</span>
+<span class="nc" id="L190">            String qry2 = String.format(&quot;SELECT credit_strct FROM course_catalog as cg,%s as sr WHERE sr.course_code=cg.course_code AND sr.semester=%d&quot;, tabname, curr2);</span>
+<span class="nc" id="L191">            Statement stmt2 = connection.createStatement();</span>
+<span class="nc" id="L192">            ResultSet rst2 = stmt.executeQuery(qry2);</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">            while (rst2.next()) {</span>
+
+<span class="nc" id="L195">                credit = rst2.getString(&quot;credit_strct&quot;);</span>
+<span class="nc" id="L196">                sum += Integer.parseInt(String.valueOf(credit.charAt(6)));</span>
+            }
+<span class="nc" id="L198">            String credit_strct2=&quot;&quot;;</span>
+<span class="nc" id="L199">            double totalCredit2=0.0;</span>
+<span class="nc" id="L200">            String qry3=String.format(&quot;SELECT credit_strct FROM course_catalog as cg,%s as sr WHERE sr.course_code=cg.course_code AND sr.semester=%d&quot;,tabname,currsem);</span>
+<span class="nc" id="L201">            Statement stmt3=connection.createStatement();</span>
+<span class="nc" id="L202">            ResultSet rst3= stmt3.executeQuery(qry3);</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            while(rst3.next())</span>
+            {
+
+<span class="nc" id="L206">                credit_strct2= rst3.getString(&quot;credit_strct&quot;);</span>
+<span class="nc" id="L207">                totalCredit2+=Integer.parseInt(String.valueOf(credit_strct2.charAt(6)));</span>
+            }
+<span class="nc" id="L209">            String qry5=String.format(&quot;SELECT credit_strct FROM course_catalog as cg WHERE cg.course_code='%s'&quot;,code);</span>
+<span class="nc" id="L210">            Statement stmt5=connection.createStatement();</span>
+<span class="nc" id="L211">            ResultSet rst5= stmt5.executeQuery(qry5);</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">            while(rst5.next())</span>
+            {
+
+<span class="nc" id="L215">                credit_strct2= rst5.getString(&quot;credit_strct&quot;);</span>
+<span class="nc" id="L216">                totalCredit2+=Integer.parseInt(String.valueOf(credit_strct2.charAt(6)));</span>
+            }
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            if(totalCredit2&lt;=(1.25*(sum/2.0)))</span>
+<span class="nc" id="L219">                return true;</span>
+            else
+<span class="nc" id="L221">                return false;</span>
+        }
+<span class="nc" id="L223">        return false;</span>
+
+    }
+    public double cgpa_calculate(Connection connection,String username) throws SQLException {
+<span class="nc" id="L227">         double sgpa=0.0;</span>
+<span class="nc" id="L228">         double sum=0.0;</span>
+<span class="nc" id="L229">         String tabname='s'+username;</span>
+<span class="nc" id="L230">         String credit=&quot;&quot;;</span>
+<span class="nc" id="L231">         double totalcred=0.0;</span>
+<span class="nc" id="L232">         String grade=&quot;&quot;;</span>
+<span class="nc" id="L233">         double cred=0.0;</span>
+
+<span class="nc" id="L235">         String qry=String.format(&quot;SELECT credit_strct,grade FROM course_catalog as cg,%s st WHERE cg.course_code=st.course_code AND st.grade &lt;&gt; 'NA'&quot;,tabname);</span>
+<span class="nc" id="L236">         Statement stmt=connection.createStatement();</span>
+<span class="nc" id="L237">         ResultSet rst=stmt.executeQuery(qry);</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">         while(rst.next())</span>
+         {
+<span class="nc" id="L240">            credit= rst.getString(1);</span>
+<span class="nc" id="L241">            grade= rst.getString(2);</span>
+<span class="nc" id="L242">            String[] cre=credit.split(&quot;-&quot;);</span>
+<span class="nc" id="L243">            cred=Double.parseDouble(cre[4]);</span>
+<span class="nc" id="L244">            totalcred+=cred;</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            if(grade.equals(&quot;A&quot;))</span>
+            {
+<span class="nc" id="L248">                sgpa+=(cred*10);</span>
+            }
+<span class="nc bnc" id="L250" title="All 2 branches missed.">             else if(grade.equals(&quot;A-&quot;))</span>
+             {
+<span class="nc" id="L252">                 sgpa+=(cred*9);</span>
+             }
+<span class="nc bnc" id="L254" title="All 2 branches missed.">             else if(grade.equals(&quot;B&quot;))</span>
+             {
+<span class="nc" id="L256">                 sgpa+=(cred*8);</span>
+             }
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            else if(grade.equals(&quot;B-&quot;))</span>
+             {
+<span class="nc" id="L260">                 sgpa+=(cred*7);</span>
+             }
+<span class="nc bnc" id="L262" title="All 2 branches missed.">             else if(grade.equals(&quot;C&quot;))</span>
+             {
+<span class="nc" id="L264">                 sgpa+=(cred*6);</span>
+             }
+<span class="nc bnc" id="L266" title="All 2 branches missed.">             else if(grade.equals(&quot;C-&quot;))</span>
+             {
+<span class="nc" id="L268">                 sgpa+=(cred*5);</span>
+             }
+<span class="nc bnc" id="L270" title="All 2 branches missed.">             else if(grade.equals(&quot;D&quot;))</span>
+             {
+<span class="nc" id="L272">                 sgpa+=(cred*4);</span>
+             }
+<span class="nc bnc" id="L274" title="All 2 branches missed.">             else if(grade.equals(&quot;F&quot;))</span>
+             {
+<span class="nc" id="L276">                 sgpa+=(cred*0.0);</span>
+             }
+
+<span class="nc" id="L279">         }</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">         if(totalcred==0.0)</span>
+<span class="nc" id="L281">             return 0.0;</span>
+<span class="nc" id="L282">         double result=sgpa/totalcred;</span>
+
+<span class="nc" id="L284">         return result;</span>
+    }
+    public boolean isminSemCompleted(Connection connection,String username,String code) throws SQLException {
+<span class="nc" id="L287">        Integer syr=0;</span>
+<span class="nc" id="L288">        Integer currsem=0;</span>
+<span class="nc" id="L289">        String srecord='s'+username;</span>
+<span class="nc" id="L290">        academicOffice acaoff=new academicOffice();</span>
+<span class="nc" id="L291">        Statement sts=connection.createStatement();</span>
+<span class="nc" id="L292">        String q=String.format(&quot;SELECT entryyr FROM students WHERE entry_no='%s'&quot;,username);</span>
+<span class="nc" id="L293">        ResultSet rst=sts.executeQuery(q);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        while(rst.next()) {</span>
+<span class="nc" id="L295">            syr = rst.getInt(&quot;entryyr&quot;);</span>
+        }
+//                System.out.println(syr);
+
+<span class="nc" id="L299">        currsem=(acaoff.year-syr)*2+acaoff.sem;</span>
+//        System.out.println(currsem);
+<span class="nc" id="L301">        int minsem=0;</span>
+<span class="nc" id="L302">        Statement sts2=connection.createStatement();</span>
+<span class="nc" id="L303">        String q2=String.format(&quot;SELECT minsem_req from course_offering where course_code='%s'&quot;,code);</span>
+<span class="nc" id="L304">        ResultSet rst2=sts.executeQuery(q2);</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        while(rst2.next()) {</span>
+<span class="nc" id="L306">            minsem = rst2.getInt(&quot;minsem_req&quot;);</span>
+        }
+<span class="nc" id="L308">        System.out.println(minsem);</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">        if(currsem&gt;minsem) {</span>
+<span class="nc" id="L310">            return true;</span>
+        }
+        else {
+<span class="nc" id="L313">            return false;</span>
+        }
+    }
+    public boolean isCourseFloated(Connection connection,String code,String inst) throws SQLException {
+<span class="nc" id="L317">        Integer count=0;</span>
+
+<span class="nc" id="L319">        Statement stmt=connection.createStatement();</span>
+<span class="nc" id="L320">        String query=String.format(&quot;select count(*) as count from course_offering where course_code='%s' AND instructor='%s'&quot;,code,inst);</span>
+<span class="nc" id="L321">        ResultSet result=stmt.executeQuery(query);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">        while(result.next())</span>
+        {
+<span class="nc" id="L324">            count=result.getInt(&quot;count&quot;);</span>
+        }
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if(count==1)</span>
+<span class="nc" id="L327">            return true;</span>
+
+<span class="nc" id="L329">        return false;</span>
+    }
+    public void enroll_course(Connection connection,String username)throws IOException, SQLException
+    {
+
+<span class="nc" id="L334">        academicOffice acaoff=new academicOffice();</span>
+
+<span class="nc" id="L336">        String srecord='s'+username;</span>
+<span class="nc" id="L337">        System.out.println(&quot;Select the course from below list ot register\n&quot;);</span>
+<span class="nc" id="L338">        System.out.println(&quot;----------------------------------------------------------------------------------------------------------\n&quot;);</span>
+//        System.out.println(&quot;CODE    INSTRUCTOR  CGPA_REQUIRED    MINSEM_REQUIRED    CORE    ELECTIVES\n&quot;);
+<span class="nc" id="L340">        String qry=&quot;SELECT course_code,instructor,cgpa_const,minsem_req,core,elective FROM course_offering ;&quot;;</span>
+<span class="nc" id="L341">        Statement st = connection.createStatement();</span>
+<span class="nc" id="L342">        ResultSet res = st.executeQuery(qry);</span>
+<span class="nc" id="L343">        ResultSetMetaData rsmd = res.getMetaData();</span>
+<span class="nc" id="L344">        int columnsNumber = rsmd.getColumnCount();</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        while (res.next()) {</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">            for(int i = 1 ; i &lt;= columnsNumber; i++){</span>
+
+<span class="nc" id="L348">                System.out.print(res.getString(i) + &quot;   &quot;);</span>
+
+            }
+<span class="nc" id="L351">            System.out.println(&quot;\n&quot;);</span>
+        }
+<span class="nc" id="L353">        System.out.println(&quot;----------------------------------------------------------------------------------------------------------\n&quot;);</span>
+
+<span class="nc" id="L355">        System.out.println(&quot;Enter the Course code and instructor name\n&quot;);</span>
+<span class="nc" id="L356">        BufferedReader cc=new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="nc" id="L357">        String code=cc.readLine();</span>
+<span class="nc" id="L358">        String inst=cc.readLine();</span>
+
+
+<span class="nc" id="L361">        Integer syr=0;</span>
+<span class="nc" id="L362">        Integer currsem=0;</span>
+<span class="nc" id="L363">        String department=&quot;&quot;;</span>
+<span class="nc" id="L364">        String studentName=&quot;&quot;;</span>
+<span class="nc" id="L365">        Statement sts=connection.createStatement();</span>
+<span class="nc" id="L366">        String q=String.format(&quot;SELECT entryyr,name,dept FROM students WHERE entry_no='%s'&quot;,username);</span>
+<span class="nc" id="L367">        ResultSet rst=sts.executeQuery(q);</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">        while(rst.next()) {</span>
+<span class="nc" id="L369">            syr = rst.getInt(&quot;entryyr&quot;);</span>
+<span class="nc" id="L370">            studentName=rst.getString(&quot;name&quot;);</span>
+<span class="nc" id="L371">            department=rst.getString(&quot;dept&quot;);</span>
+        }
+//                System.out.println(syr);
+
+<span class="nc" id="L375">        currsem=(acaoff.year-syr)*2+acaoff.sem;</span>
+//        System.out.println(currsem);
+
+<span class="nc" id="L378">        double cgpa_req=0.0;</span>
+<span class="nc" id="L379">        String instabname=&quot;&quot;;</span>
+<span class="nc" id="L380">        Statement sts2=connection.createStatement();</span>
+<span class="nc" id="L381">        String q2=String.format(&quot;SELECT cgpa_const,username FROM course_offering WHERE course_code='%s' AND instructor='%s'&quot;,code,inst);</span>
+<span class="nc" id="L382">        ResultSet rst2=sts.executeQuery(q2);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        while(rst2.next()) {</span>
+<span class="nc" id="L384">            cgpa_req = rst2.getDouble(&quot;cgpa_const&quot;);</span>
+<span class="nc" id="L385">            instabname=rst2.getString(&quot;username&quot;);</span>
+        }
+
+<span class="nc" id="L388">        String core=&quot;&quot;;</span>
+<span class="nc" id="L389">        String elective=&quot;&quot;;</span>
+<span class="nc" id="L390">        String qery=String.format(&quot;SELECT core,elective FROM coreelective as ce WHERE ce.course_code='%s'&quot;,code);</span>
+<span class="nc" id="L391">        Statement state=connection.createStatement();</span>
+<span class="nc" id="L392">        ResultSet result=state.executeQuery(qery);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">        while(result.next())</span>
+        {
+<span class="nc" id="L395">            core=result.getString(&quot;core&quot;);</span>
+<span class="nc" id="L396">            elective=result.getString(&quot;elective&quot;);</span>
+        }
+<span class="nc" id="L398">        core=core.replace(&quot;}&quot;,&quot;&quot;);</span>
+<span class="nc" id="L399">        core=core.replace(&quot;{&quot;,&quot;&quot;);</span>
+
+<span class="nc" id="L401">        String[] coreBranches=core.split(&quot;,&quot;);</span>
+<span class="nc" id="L402">        elective=elective.replace(&quot;}&quot;,&quot;&quot;);</span>
+<span class="nc" id="L403">        elective=elective.replace(&quot;{&quot;,&quot;&quot;);</span>
+
+<span class="nc" id="L405">        String[] elecBranches=elective.split(&quot;,&quot;);</span>
+
+<span class="nc" id="L407">        boolean iscore=false;</span>
+<span class="nc" id="L408">        boolean iselective=false;</span>
+
+<span class="nc bnc" id="L410" title="All 2 branches missed.">        for(int i=0;i&lt;coreBranches.length;i++)</span>
+        {
+<span class="nc bnc" id="L412" title="All 2 branches missed.">            if(coreBranches[i].equals(department)) {</span>
+<span class="nc" id="L413">                iscore = true;</span>
+<span class="nc" id="L414">                break;</span>
+            }
+        }
+<span class="nc bnc" id="L417" title="All 2 branches missed.">        for(int i=0;i&lt;elecBranches.length;i++)</span>
+        {
+<span class="nc bnc" id="L419" title="All 2 branches missed.">            if(elecBranches[i].equals(department)) {</span>
+<span class="nc" id="L420">                iselective = true;</span>
+<span class="nc" id="L421">                break;</span>
+            }
+        }
+
+<span class="nc bnc" id="L425" title="All 2 branches missed.">        if(isCourseFloated(connection,code,inst)) {</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">            if (idNotAreadyCompleted(connection, username, code,currsem)) {</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">                if (acaoff.regDreg == 1) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">                    if (isminSemCompleted(connection, username, code)) {</span>
+<span class="nc bnc" id="L429" title="All 6 branches missed.">                        if (currsem == 1 || (currsem != 1 &amp;&amp; cgpa_calculate(connection, username) &gt;= cgpa_req)) {</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">                            if (ispreRequisites(connection, code, username, currsem)) {</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">                                if (isCreditCriteria(connection, username, currsem, code)) {</span>
+
+<span class="nc bnc" id="L433" title="All 4 branches missed.">                                    if (iscore || iselective) {</span>
+<span class="nc" id="L434">                                        String course_name = &quot;&quot;;</span>
+<span class="nc" id="L435">                                        Statement sts3 = connection.createStatement();</span>
+<span class="nc" id="L436">                                        String q4 = String.format(&quot;SELECT course_name from course_catalog where course_code='%s'&quot;, code);</span>
+<span class="nc" id="L437">                                        ResultSet rst3 = sts3.executeQuery(q4);</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                                        while (rst3.next()) {</span>
+<span class="nc" id="L439">                                            course_name = rst3.getString(&quot;course_name&quot;);</span>
+                                        }
+
+<span class="nc" id="L442">                                        String q3 = String.format(&quot;insert into %s values(?,?,?,?,?)&quot;, srecord);</span>
+<span class="nc" id="L443">                                        PreparedStatement pstmt = connection.prepareStatement(q3);</span>
+<span class="nc" id="L444">                                        pstmt.setString(1, code);</span>
+<span class="nc" id="L445">                                        pstmt.setString(2, course_name);</span>
+<span class="nc" id="L446">                                        pstmt.setInt(3, currsem);</span>
+<span class="nc" id="L447">                                        pstmt.setString(4, &quot;NA&quot;);</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">                                        if (iscore)</span>
+<span class="nc" id="L449">                                            pstmt.setString(5, &quot;core&quot;);</span>
+<span class="nc bnc" id="L450" title="All 2 branches missed.">                                        else if (iselective)</span>
+<span class="nc" id="L451">                                            pstmt.setString(5, &quot;elective&quot;);</span>
+<span class="nc" id="L452">                                        pstmt.execute();</span>
+<span class="nc" id="L453">                                        pstmt.close();</span>
+
+<span class="nc" id="L455">                                        String qinst = String.format(&quot;INSERT INTO %s VALUES(?,?,?)&quot;, instabname);</span>
+<span class="nc" id="L456">                                        PreparedStatement pstmt2 = connection.prepareStatement(qinst);</span>
+<span class="nc" id="L457">                                        pstmt2.setString(1, code);</span>
+<span class="nc" id="L458">                                        pstmt2.setString(2, studentName);</span>
+<span class="nc" id="L459">                                        pstmt2.setString(3, username);</span>
+<span class="nc" id="L460">                                        pstmt2.execute();</span>
+<span class="nc" id="L461">                                        pstmt2.close();</span>
+
+<span class="nc" id="L463">                                    } else {</span>
+<span class="nc" id="L464">                                        System.out.println(&quot;This course is not floated for your Branch\n&quot;);</span>
+                                    }
+                                } else {
+<span class="nc" id="L467">                                    System.out.println(&quot;You can't enroll this course.. Credit limit Exceeded\n&quot;);</span>
+                                }
+                            } else {
+<span class="nc" id="L470">                                System.out.println(&quot;You haven't completed the preRequisites for this course\n&quot;);</span>
+                            }
+                        } else {
+<span class="nc" id="L473">                            System.out.println(&quot;CGPA criteria is not fulfilled\n&quot;);</span>
+                        }
+                    } else {
+<span class="nc" id="L476">                        System.out.println(&quot;You haven't completed the minimum semester required for this course\n&quot;);</span>
+                    }
+
+                } else {
+<span class="nc" id="L480">                    System.out.println(&quot;Course enroll and drop window is not open\n&quot;);</span>
+                }
+            }
+            else {
+<span class="nc" id="L484">                System.out.println(&quot;you have either passed this course or already registered for this course\n&quot;);</span>
+            }
+        }
+        else
+        {
+<span class="nc" id="L489">            System.out.println(&quot;This course is not floated\n&quot;);</span>
+        }
+
+<span class="nc" id="L492">    }</span>
+//    public static void main(String[] args) throws SQLException {
+//        databaseSeeder ds=new databaseSeeder();
+//        Connection connection=ds.connect();
+//        students st=new students();
+////        System.out.println(st.ispreRequisites(connection,&quot;HS104&quot;,&quot;2020CSB1098&quot;,1));
+////        System.out.println(st.cgpa_calculate(connection,&quot;2020CSB1098&quot;));
+////        System.out.println(st.isminSemCompleted(connection,&quot;2020CSB1098&quot;,&quot;HS104&quot;));
+////        System.out.println(st.ispreRequisites(connection,&quot;HS104&quot;,&quot;2020CSB1098&quot;));
+////        System.out.println(st.sumofcredits(connection,&quot;2020CSB1098&quot;,3));
+//    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
