@@ -49,6 +49,13 @@ CREATE TABLE coreElective
     core VARCHAR[],
     elective VARCHAR[]
 );
+CREATE TABLE event(
+    regDreg INTEGER,
+       floatInst INTEGER,
+         year INTEGER,
+        sem INTEGER
+
+);
 
 
 

@@ -7,10 +7,17 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class students {
+
+    academicOffice acaoff;
+
+    public students(){
+        acaoff = new academicOffice();
+    }
+
     public boolean idNotAreadyCompleted(Connection connection,String username,String code,Integer currsem) throws SQLException {
         String tabname='s'+username;
         Integer count=0;
-        String qry=String .format("SELECT count(*) FROM %s WHERE course_code='%s' AND grade<>'F' AND grade<>'NA' AND semester<> %d",tabname,code,currsem);
+        String qry=String .format("SELECT count(*) FROM %s WHERE course_code='%s' AND grade<>'F'",tabname,code,currsem);
         Statement stmt=connection.createStatement();
         ResultSet result=stmt.executeQuery(qry);
         while(result.next())
@@ -36,7 +43,7 @@ public class students {
         }
 
     }
-    public void view_grades(Connection connection,String username) throws SQLException, IOException {
+    public boolean view_grades(Connection connection,String username) throws SQLException, IOException {
         System.out.println("Enter the Semester you wanna see grades\n");
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String semester= bfr.readLine();
@@ -61,9 +68,25 @@ public class students {
             }
             System.out.println("\n");//Move to the next line to print the next row.
         }
+        return true;
     }
     public boolean deregisterCourse(Connection connection,String username) throws IOException, SQLException {
+        Integer regDreg=0;
+        Integer floatInst=0;
+        Integer year=0;
+        Integer sem=0;
 
+        String qryt=String.format("SELECT regDreg ,floatInst,year,sem from event");
+        Statement stmn=connection.createStatement();
+        ResultSet ress=stmn.executeQuery(qryt);
+        while(ress.next())
+        {
+            regDreg=ress.getInt("regDreg");
+            floatInst=ress.getInt("floatInst");
+            year=ress.getInt("year");
+            sem=ress.getInt("sem");
+
+        }
         System.out.println("Enter the Course code and instructor You want to drop\n");
         BufferedReader cc=new BufferedReader(new InputStreamReader(System.in));
         String code=cc.readLine();
@@ -87,7 +110,7 @@ public class students {
             else if(count==1)
             {
                 academicOffice acoff=new academicOffice();
-                if(acoff.regDreg==1)
+                if(regDreg==1)
                 {
                     String query=String.format("DELETE FROM %s WHERE course_code='%s'",tabname,code);
                     PreparedStatement pstmt=connection.prepareStatement(query);
@@ -147,7 +170,7 @@ public class students {
     }
     public boolean isCreditCriteria(Connection connection,String username,int currsem,String code) throws SQLException {
         String tabname='s'+username;
-        System.out.println(currsem+2);
+        System.out.println(currsem+2+"This is the credites\n");
         System.out.println(code);
         if(currsem<=2)
         {
@@ -174,9 +197,9 @@ public class students {
                 totalCredit+=Double.parseDouble(cr2[4]);
             }
 
-            if(totalCredit<=18)
+            if(totalCredit<=100)
                 return true;
-            else if(totalCredit>18)
+            else if(totalCredit>100)
                 return false;
         }
         else
@@ -295,6 +318,22 @@ public class students {
          return result;
     }
     public boolean isminSemCompleted(Connection connection,String username,String code) throws SQLException {
+        Integer regDreg=0;
+        Integer floatInst=0;
+        Integer year=0;
+        Integer sem=0;
+
+        String qryt=String.format("SELECT regDreg ,floatInst,year,sem from event");
+        Statement stmn=connection.createStatement();
+        ResultSet ress=stmn.executeQuery(qryt);
+        while(ress.next())
+        {
+            regDreg=ress.getInt("regDreg");
+            floatInst=ress.getInt("floatInst");
+            year=ress.getInt("year");
+            sem=ress.getInt("sem");
+
+        }
         Integer syr=0;
         Integer currsem=0;
         String srecord='s'+username;
@@ -307,7 +346,7 @@ public class students {
         }
 //                System.out.println(syr);
 
-        currsem=(acaoff.year-syr)*2+acaoff.sem;
+        currsem=(year-syr)*2+sem;
 //        System.out.println(currsem);
         int minsem=0;
         Statement sts2=connection.createStatement();
@@ -341,9 +380,23 @@ public class students {
     }
     public boolean enroll_course(Connection connection,String username)throws IOException, SQLException
     {
+        Integer regDreg=0;
+        Integer floatInst=0;
+        Integer year=0;
+        Integer sem=0;
 
-        academicOffice acaoff=new academicOffice();
+        String qryt=String.format("SELECT regDreg ,floatInst,year,sem from event");
+        Statement stmn=connection.createStatement();
+        ResultSet ress=stmn.executeQuery(qryt);
+        while(ress.next())
+        {
+            regDreg=ress.getInt("regDreg");
+            floatInst=ress.getInt("floatInst");
+            year=ress.getInt("year");
+            sem=ress.getInt("sem");
 
+        }
+        username=username.toLowerCase();
         String srecord='s'+username;
         System.out.println("Select the course from below list ot register\n");
         System.out.println("----------------------------------------------------------------------------------------------------------\n");
@@ -381,9 +434,9 @@ public class students {
             studentName=rst.getString("name");
             department=rst.getString("dept");
         }
-//                System.out.println(syr);
+                System.out.println(syr+"this is th student year");
 
-        currsem=(acaoff.year-syr)*2+acaoff.sem;
+        currsem=(year-syr)*2+sem;
 //        System.out.println(currsem);
 
         double cgpa_req=0.0;
@@ -433,9 +486,11 @@ public class students {
             }
         }
 
+
+
         if(isCourseFloated(connection,code,inst)) {
             if (idNotAreadyCompleted(connection, username, code,currsem)) {
-                if (acaoff.regDreg == 1) {
+                if (regDreg == 1) {
                     if (isminSemCompleted(connection, username, code)) {
                         if (currsem == 1 || (currsem != 1 && cgpa_calculate(connection, username) >= cgpa_req)) {
                             if (ispreRequisites(connection, code, username, currsem)) {

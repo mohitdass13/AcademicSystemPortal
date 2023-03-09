@@ -13,253 +13,293 @@ import java.util.Scanner;
 //INSERT INTO course_catalog VALUES ('CS301','DATABASE SYSTEMS','6-1-2-3','{&quot;CS202&quot;,&quot;CS201&quot;}');
 //INSERT INTO coreElective VALUES('CS301',1,'{&quot;CSE,MNC&quot;}','{&quot;CIV&quot;}');
 
-<span class="nc" id="L16">public class instructor {</span>
-    void updateGrades(Connection connection) throws IOException, SQLException {
-<span class="nc" id="L18">        System.out.println(&quot;enter the course code :\n&quot;);</span>
-<span class="nc" id="L19">        BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));</span>
-<span class="nc" id="L20">        String code=reader.readLine();</span>
-<span class="nc" id="L21">        String file=&quot;./src/datafeed/grades.csv&quot;;</span>
-<span class="nc" id="L22">        BufferedReader read = null;</span>
-<span class="nc" id="L23">        String line=&quot;&quot;;</span>
+<span class="fc" id="L16">public class instructor {</span>
+    public boolean updateGrades(Connection connection,String username) throws IOException, SQLException {
+<span class="fc" id="L18">        System.out.println(&quot;enter the course code :\n&quot;);</span>
+<span class="fc" id="L19">        BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="fc" id="L20">        String code=reader.readLine();</span>
+<span class="fc" id="L21">        String file=&quot;&quot;;</span>
+<span class="fc" id="L22">        System.out.println(&quot;Enter the file path to upload the grades&quot;);</span>
+<span class="fc" id="L23">        file= reader.readLine();</span>
+<span class="fc" id="L24">        file=&quot;./src/datafeed/grades.csv&quot;;</span>
+<span class="fc" id="L25">        BufferedReader read = null;</span>
+<span class="fc" id="L26">        String line=&quot;&quot;;</span>
 
-<span class="nc" id="L25">        read=new BufferedReader(new FileReader(file));</span>
-<span class="nc bnc" id="L26" title="All 2 branches missed.">        while((line= read.readLine())!=null)</span>
+<span class="fc" id="L28">        String  name=&quot;&quot;;</span>
+<span class="fc" id="L29">        String q2=String.format(&quot;SELeCT name from users where username='%s'&quot;,username);</span>
+<span class="fc" id="L30">        Statement stmt=connection.createStatement();</span>
+<span class="fc" id="L31">        ResultSet result=stmt.executeQuery(q2);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        while (result.next())</span>
         {
-<span class="nc" id="L28">            String[] row=line.split(&quot;,&quot;);</span>
-<span class="nc" id="L29">            String entryNO=row[0];</span>
-<span class="nc" id="L30">            String grade=row[1];</span>
-<span class="nc" id="L31">            String tabname='s'+entryNO;</span>
-<span class="nc" id="L32">            String qry=String.format(&quot;UPDATE %s SET grade = '%s' WHERE course_code='%s'&quot;,tabname,grade,code);</span>
-<span class="nc" id="L33">            PreparedStatement stmt=connection.prepareStatement(qry);</span>
-<span class="nc" id="L34">            stmt.execute();</span>
-<span class="nc" id="L35">            stmt.close();</span>
-<span class="nc" id="L36">        }</span>
+<span class="fc" id="L34">            name=result.getString(&quot;name&quot;);</span>
 
-<span class="nc" id="L38">    }</span>
-    public String coursesOffered(Connection connection,String username) throws SQLException {
-<span class="nc" id="L40">        String toreturn=&quot;&quot;;</span>
-<span class="nc" id="L41">        String name = &quot;&quot;;</span>
-<span class="nc" id="L42">        String query = String.format(&quot;SELECT name FROM users WHERE username='%s'&quot;, username);</span>
-<span class="nc" id="L43">        Statement stmt = connection.createStatement();</span>
-<span class="nc" id="L44">        ResultSet result = stmt.executeQuery(query);</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        while (result.next()) {</span>
-<span class="nc" id="L46">            name = result.getString(&quot;name&quot;);</span>
         }
-<span class="nc" id="L48">        String qry = String.format(&quot;SELECT * FROM course_offering WHERE instructor='%s'&quot;,name);</span>
-<span class="nc" id="L49">        Statement st = connection.createStatement();</span>
-<span class="nc" id="L50">        ResultSet res = st.executeQuery(qry);</span>
-<span class="nc" id="L51">        ResultSetMetaData rsmd = res.getMetaData();</span>
-
-<span class="nc" id="L53">        int columnsNumber = rsmd.getColumnCount();</span>
-
-<span class="nc bnc" id="L55" title="All 2 branches missed.">        while (res.next()) {</span>
-<span class="nc bnc" id="L56" title="All 2 branches missed.">            for (int i = 1; i &lt;= columnsNumber; i++) {</span>
-
-<span class="nc" id="L58">                System.out.print(res.getString(i) + &quot; &quot;);</span>
-<span class="nc" id="L59">                toreturn+=res.getString(i)+&quot; &quot;;</span>
-
-            }
-<span class="nc" id="L62">            System.out.println(&quot;\n&quot;);//Move to the next line to print the next row.</span>
-<span class="nc" id="L63">            toreturn+=&quot;\n&quot;;</span>
+<span class="fc" id="L37">       Integer count=0;</span>
+<span class="fc" id="L38">        String qery=String.format(&quot;select count(*) from course_offering where course_code='%s' and instructor='%s'&quot;,code,name);</span>
+<span class="fc" id="L39">        Statement stmnt=connection.createStatement();</span>
+<span class="fc" id="L40">        ResultSet res=stmnt.executeQuery(qery);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        while(res.next())</span>
+        {
+<span class="fc" id="L43">            count=res.getInt(&quot;count&quot;);</span>
         }
-<span class="nc" id="L65">       return toreturn;</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if(count==0)</span>
+<span class="fc" id="L46">            return false;</span>
+
+<span class="nc" id="L48">        read=new BufferedReader(new FileReader(file));</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        while((line= read.readLine())!=null)</span>
+        {
+<span class="nc" id="L51">            String[] row=line.split(&quot;,&quot;);</span>
+<span class="nc" id="L52">            String entryNO=row[0];</span>
+<span class="nc" id="L53">            String grade=row[1];</span>
+<span class="nc" id="L54">            String tabname='s'+entryNO;</span>
+<span class="nc" id="L55">            String qry=String.format(&quot;UPDATE %s SET grade = '%s' WHERE course_code='%s'&quot;,tabname,grade,code);</span>
+<span class="nc" id="L56">            PreparedStatement stmt2=connection.prepareStatement(qry);</span>
+<span class="nc" id="L57">            stmt2.execute();</span>
+<span class="nc" id="L58">            stmt2.close();</span>
+<span class="nc" id="L59">        }</span>
+<span class="nc" id="L60">        return true;</span>
 
     }
-    public String  viewGrades(Connection connection,String username) throws IOException, SQLException {
-<span class="nc" id="L69">        String toreturn=&quot;&quot;;</span>
-<span class="nc" id="L70">        System.out.println(&quot;Enter the Entry No. of the Student You wanna see the grades\n&quot;);</span>
-<span class="nc" id="L71">        BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));</span>
-<span class="nc" id="L72">        String entryno=reader.readLine();</span>
-<span class="nc" id="L73">        entryno=entryno.toLowerCase();</span>
-<span class="nc" id="L74">        String tabname='s'+entryno;</span>
-<span class="nc" id="L75">        boolean isStudentExists=true;</span>
-
-<span class="nc" id="L77">        int count=0;</span>
-<span class="nc" id="L78">        String stuqry=String.format(&quot;SELECT count(*) FROM students WHERE entry_no='%s'&quot;,entryno);</span>
-<span class="nc" id="L79">        Statement stmt=connection.createStatement();</span>
-<span class="nc" id="L80">        ResultSet result=stmt.executeQuery(stuqry);</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">        while(result.next())</span>
-        {
-<span class="nc" id="L83">            count=result.getInt(&quot;count&quot;);</span>
+    public boolean coursesOffered(Connection connection,String username) throws SQLException {
+<span class="fc" id="L64">        String toreturn=&quot;&quot;;</span>
+<span class="fc" id="L65">        String name = &quot;&quot;;</span>
+<span class="fc" id="L66">        String query = String.format(&quot;SELECT name FROM users WHERE username='%s'&quot;, username);</span>
+<span class="fc" id="L67">        Statement stmt = connection.createStatement();</span>
+<span class="fc" id="L68">        ResultSet result = stmt.executeQuery(query);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        while (result.next()) {</span>
+<span class="fc" id="L70">            name = result.getString(&quot;name&quot;);</span>
         }
-<span class="nc bnc" id="L85" title="All 2 branches missed.">        if(count==0)</span>
-<span class="nc" id="L86">            isStudentExists=false;</span>
+<span class="fc" id="L72">        String qry = String.format(&quot;SELECT * FROM course_offering WHERE instructor='%s'&quot;,name);</span>
+<span class="fc" id="L73">        Statement st = connection.createStatement();</span>
+<span class="fc" id="L74">        ResultSet res = st.executeQuery(qry);</span>
+<span class="fc" id="L75">        ResultSetMetaData rsmd = res.getMetaData();</span>
 
-<span class="nc bnc" id="L88" title="All 2 branches missed.">        if(isStudentExists) {</span>
-<span class="nc" id="L89">            String qry = String.format(&quot;SELECT * FROM %s ;&quot;, tabname);</span>
-<span class="nc" id="L90">            Statement st = connection.createStatement();</span>
-<span class="nc" id="L91">            ResultSet res = st.executeQuery(qry);</span>
-<span class="nc" id="L92">            ResultSetMetaData rsmd = res.getMetaData();</span>
+<span class="fc" id="L77">        int columnsNumber = rsmd.getColumnCount();</span>
 
-<span class="nc" id="L94">            int columnsNumber = rsmd.getColumnCount();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        while (res.next()) {</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            for (int i = 1; i &lt;= columnsNumber; i++) {</span>
 
-<span class="nc bnc" id="L96" title="All 2 branches missed.">            while (res.next()) {</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">                for (int i = 1; i &lt;= columnsNumber; i++) {</span>
+<span class="fc" id="L82">                System.out.print(res.getString(i) + &quot; &quot;);</span>
+<span class="fc" id="L83">                toreturn+=res.getString(i)+&quot; &quot;;</span>
 
-<span class="nc" id="L99">                    System.out.print(res.getString(i) + &quot; &quot;);</span>
-<span class="nc" id="L100">                    toreturn+=res.getString(i)+&quot; &quot;;</span>
+            }
+<span class="fc" id="L86">            System.out.println(&quot;\n&quot;);//Move to the next line to print the next row.</span>
+<span class="fc" id="L87">            toreturn+=&quot;\n&quot;;</span>
+        }
+<span class="fc" id="L89">       return true;</span>
+
+    }
+    public boolean  viewGrades(Connection connection,String username) throws IOException, SQLException {
+<span class="fc" id="L93">        String toreturn=&quot;&quot;;</span>
+<span class="fc" id="L94">        System.out.println(&quot;Enter the Entry No. of the Student You wanna see the grades\n&quot;);</span>
+<span class="fc" id="L95">        BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="fc" id="L96">        String entryno=reader.readLine();</span>
+<span class="fc" id="L97">        entryno=entryno.toLowerCase();</span>
+<span class="fc" id="L98">        String tabname='s'+entryno;</span>
+<span class="fc" id="L99">        boolean isStudentExists=true;</span>
+
+<span class="fc" id="L101">        int count=0;</span>
+<span class="fc" id="L102">        String stuqry=String.format(&quot;SELECT count(*) FROM students WHERE entry_no='%s'&quot;,entryno);</span>
+<span class="fc" id="L103">        Statement stmt=connection.createStatement();</span>
+<span class="fc" id="L104">        ResultSet result=stmt.executeQuery(stuqry);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        while(result.next())</span>
+        {
+<span class="fc" id="L107">            count=result.getInt(&quot;count&quot;);</span>
+        }
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if(count==0)</span>
+<span class="fc" id="L110">            isStudentExists=false;</span>
+
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if(isStudentExists) {</span>
+<span class="fc" id="L113">            String qry = String.format(&quot;SELECT * FROM %s ;&quot;, tabname);</span>
+<span class="fc" id="L114">            Statement st = connection.createStatement();</span>
+<span class="fc" id="L115">            ResultSet res = st.executeQuery(qry);</span>
+<span class="fc" id="L116">            ResultSetMetaData rsmd = res.getMetaData();</span>
+
+<span class="fc" id="L118">            int columnsNumber = rsmd.getColumnCount();</span>
+
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            while (res.next()) {</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">                for (int i = 1; i &lt;= columnsNumber; i++) {</span>
+
+<span class="fc" id="L123">                    System.out.print(res.getString(i) + &quot; &quot;);</span>
+<span class="fc" id="L124">                    toreturn+=res.getString(i)+&quot; &quot;;</span>
 
                 }
 
 
-<span class="nc" id="L105">                System.out.println(&quot;\n&quot;);//Move to the next line to print the next row.</span>
-<span class="nc" id="L106">                toreturn+=&quot;\n&quot;;</span>
+<span class="fc" id="L129">                System.out.println(&quot;\n&quot;);//Move to the next line to print the next row.</span>
+<span class="fc" id="L130">                toreturn+=&quot;\n&quot;;</span>
 
             }
-<span class="nc" id="L109">            return toreturn;</span>
+<span class="fc" id="L133">            return true;</span>
         }
         else {
-<span class="nc" id="L112">            System.out.println(&quot;This Student doesn't exists .. Please Enter the correct entry no\n&quot;);</span>
-<span class="nc" id="L113">            return &quot;This Student doesn't exists .. Please Enter the correct entry no\n&quot;;</span>
+<span class="fc" id="L136">            System.out.println(&quot;This Student doesn't exists .. Please Enter the correct entry no\n&quot;);</span>
+<span class="fc" id="L137">            return false;</span>
         }
 
     }
-    public void dRegisterCourse(Connection connection,String username) throws IOException, SQLException {
-<span class="nc" id="L118">        System.out.println(&quot;Enter the course You wanna Deregister\n&quot;);</span>
-<span class="nc" id="L119">        BufferedReader rdr=new BufferedReader(new InputStreamReader(System.in));</span>
-<span class="nc" id="L120">        String code=rdr.readLine();</span>
+    public boolean dRegisterCourse(Connection connection,String username) throws IOException, SQLException {
+<span class="fc" id="L142">        Integer regDreg=0;</span>
+<span class="fc" id="L143">        Integer floatInst=0;</span>
+<span class="fc" id="L144">        Integer year=0;</span>
+<span class="fc" id="L145">        Integer sem=0;</span>
 
-<span class="nc" id="L122">        String name = &quot;&quot;;</span>
-<span class="nc" id="L123">        String query = String.format(&quot;SELECT name FROM users WHERE username='%s'&quot;, username);</span>
-<span class="nc" id="L124">        Statement stmt = connection.createStatement();</span>
-<span class="nc" id="L125">        ResultSet result = stmt.executeQuery(query);</span>
-<span class="nc bnc" id="L126" title="All 2 branches missed.">        while (result.next()) {</span>
-<span class="nc" id="L127">            name = result.getString(&quot;name&quot;);</span>
-        }
-
-<span class="nc" id="L130">        boolean isAlready = false;</span>
-<span class="nc" id="L131">        int count = 0;</span>
-<span class="nc" id="L132">        String qry2 = String.format(&quot;SELECT count(*) FROM course_offering WHERE course_code='%s' AND instructor='%s'&quot;, code, name);</span>
-<span class="nc" id="L133">        Statement stmt3 = connection.createStatement();</span>
-<span class="nc" id="L134">        ResultSet rst = stmt3.executeQuery(qry2);</span>
-<span class="nc bnc" id="L135" title="All 2 branches missed.">        while (rst.next()) {</span>
-<span class="nc" id="L136">            count = rst.getInt(&quot;count&quot;);</span>
-        }
-<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (count == 1)</span>
-<span class="nc" id="L139">            isAlready = true;</span>
-<span class="nc" id="L140">        academicOffice acoff=new academicOffice();</span>
-<span class="nc bnc" id="L141" title="All 2 branches missed.">        if(acoff.floatInst==1)</span>
+<span class="fc" id="L147">        String qryt=String.format(&quot;SELECT regDreg ,floatInst,year,sem from event&quot;);</span>
+<span class="fc" id="L148">        Statement stmn=connection.createStatement();</span>
+<span class="fc" id="L149">        ResultSet ress=stmn.executeQuery(qryt);</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        while(ress.next())</span>
         {
-<span class="nc bnc" id="L143" title="All 2 branches missed.">            if(isAlready)</span>
+<span class="fc" id="L152">            regDreg=ress.getInt(&quot;regDreg&quot;);</span>
+<span class="fc" id="L153">            floatInst=ress.getInt(&quot;floatInst&quot;);</span>
+<span class="fc" id="L154">            year=ress.getInt(&quot;year&quot;);</span>
+<span class="fc" id="L155">            sem=ress.getInt(&quot;sem&quot;);</span>
+
+        }
+<span class="fc" id="L158">        System.out.println(&quot;Enter the course You wanna Deregister\n&quot;);</span>
+<span class="fc" id="L159">        BufferedReader rdr=new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="fc" id="L160">        String code=rdr.readLine();</span>
+
+<span class="fc" id="L162">        String name = &quot;&quot;;</span>
+<span class="fc" id="L163">        String query = String.format(&quot;SELECT name FROM users WHERE username='%s'&quot;, username);</span>
+<span class="fc" id="L164">        Statement stmt = connection.createStatement();</span>
+<span class="fc" id="L165">        ResultSet result = stmt.executeQuery(query);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        while (result.next()) {</span>
+<span class="fc" id="L167">            name = result.getString(&quot;name&quot;);</span>
+        }
+
+<span class="fc" id="L170">        boolean isAlready = false;</span>
+<span class="fc" id="L171">        int count = 0;</span>
+<span class="fc" id="L172">        String qry2 = String.format(&quot;SELECT count(*) FROM course_offering WHERE course_code='%s' AND instructor='%s'&quot;, code, name);</span>
+<span class="fc" id="L173">        Statement stmt3 = connection.createStatement();</span>
+<span class="fc" id="L174">        ResultSet rst = stmt3.executeQuery(qry2);</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        while (rst.next()) {</span>
+<span class="fc" id="L176">            count = rst.getInt(&quot;count&quot;);</span>
+        }
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (count == 1)</span>
+<span class="fc" id="L179">            isAlready = true;</span>
+<span class="fc" id="L180">        academicOffice acoff=new academicOffice();</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if(floatInst==1)</span>
+        {
+<span class="nc bnc" id="L183" title="All 2 branches missed.">            if(isAlready)</span>
             {
-<span class="nc" id="L145">                String qry=String.format(&quot;DELETE FROM course_offering WHERE course_code='%s' and instructor='%s'&quot;,code,name);</span>
-<span class="nc" id="L146">                PreparedStatement pstmt=connection.prepareStatement(qry);</span>
-<span class="nc" id="L147">                pstmt.execute();</span>
-<span class="nc" id="L148">                pstmt.close();</span>
-<span class="nc" id="L149">                String qry4=String.format(&quot;DELETE FROM %s WHERE course_code='%s'&quot;,username,code);</span>
-<span class="nc" id="L150">                PreparedStatement pstmt4=connection.prepareStatement(qry4);</span>
-<span class="nc" id="L151">                pstmt4.execute();</span>
-<span class="nc" id="L152">                pstmt4.close();</span>
-<span class="nc" id="L153">                System.out.println(&quot;Course DeRegistered Successfully\n&quot;);</span>
-<span class="nc" id="L154">            }</span>
+<span class="nc" id="L185">                String qry=String.format(&quot;DELETE FROM course_offering WHERE course_code='%s' and instructor='%s'&quot;,code,name);</span>
+<span class="nc" id="L186">                PreparedStatement pstmt=connection.prepareStatement(qry);</span>
+<span class="nc" id="L187">                pstmt.execute();</span>
+<span class="nc" id="L188">                pstmt.close();</span>
+<span class="nc" id="L189">                String qry4=String.format(&quot;DELETE FROM %s WHERE course_code='%s'&quot;,username,code);</span>
+<span class="nc" id="L190">                PreparedStatement pstmt4=connection.prepareStatement(qry4);</span>
+<span class="nc" id="L191">                pstmt4.execute();</span>
+<span class="nc" id="L192">                pstmt4.close();</span>
+<span class="nc" id="L193">                System.out.println(&quot;Course DeRegistered Successfully\n&quot;);</span>
+<span class="nc" id="L194">            }</span>
             else{
-<span class="nc" id="L156">                System.out.println(&quot;You have not floated this course\n&quot;);</span>
+<span class="nc" id="L196">                System.out.println(&quot;You have not floated this course\n&quot;);</span>
             }
         }
         else{
-<span class="nc" id="L160">            System.out.println(&quot;Course DeRegistration window is not open\n&quot;);</span>
+<span class="fc" id="L200">            System.out.println(&quot;Course DeRegistration window is not open\n&quot;);</span>
         }
 
+<span class="fc" id="L203">return true;</span>
 
-
-<span class="nc" id="L165">    }</span>
+    }
     public void registerCourse(Connection connection,String username) throws IOException, SQLException {
-<span class="nc" id="L167">        System.out.println(&quot;Enter the course code you want to register\n&quot;);</span>
-<span class="nc" id="L168">        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));</span>
-<span class="nc" id="L169">        String code = reader.readLine();</span>
-<span class="nc" id="L170">        System.out.println(&quot;enter cgpa criteria\n&quot;);</span>
-<span class="nc" id="L171">        String cgp=reader.readLine();</span>
-<span class="nc" id="L172">        double cgpa_const =Double.parseDouble(cgp);</span>
+<span class="fc" id="L207">        System.out.println(&quot;Enter the course code you want to register\n&quot;);</span>
+<span class="fc" id="L208">        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="fc" id="L209">        String code = reader.readLine();</span>
+<span class="fc" id="L210">        System.out.println(&quot;enter cgpa criteria\n&quot;);</span>
+<span class="fc" id="L211">        String cgp=reader.readLine();</span>
+<span class="fc" id="L212">        double cgpa_const =Double.parseDouble(cgp);</span>
 
-<span class="nc" id="L174">        boolean isexist = false;</span>
-<span class="nc" id="L175">        Integer count2 = 0;</span>
-<span class="nc" id="L176">        String qrye = String.format(&quot;SELECT count(*) FROM course_catalog WHERE course_code='%s'&quot;, code);</span>
-<span class="nc" id="L177">        Statement stmnt = connection.createStatement();</span>
-<span class="nc" id="L178">        ResultSet res = stmnt.executeQuery(qrye);</span>
-<span class="nc bnc" id="L179" title="All 2 branches missed.">        while (res.next()) {</span>
-<span class="nc" id="L180">            count2 = res.getInt(&quot;count&quot;);</span>
+<span class="fc" id="L214">        boolean isexist = false;</span>
+<span class="fc" id="L215">        Integer count2 = 0;</span>
+<span class="fc" id="L216">        String qrye = String.format(&quot;SELECT count(*) FROM course_catalog WHERE course_code='%s'&quot;, code);</span>
+<span class="fc" id="L217">        Statement stmnt = connection.createStatement();</span>
+<span class="fc" id="L218">        ResultSet res = stmnt.executeQuery(qrye);</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        while (res.next()) {</span>
+<span class="fc" id="L220">            count2 = res.getInt(&quot;count&quot;);</span>
         }
-<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (count2 &gt;= 1)</span>
-<span class="nc" id="L183">            isexist = true;</span>
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">        if (count2 &gt;= 1)</span>
+<span class="fc" id="L223">            isexist = true;</span>
 
-<span class="nc" id="L185">        String name = &quot;&quot;;</span>
-<span class="nc" id="L186">        String query = String.format(&quot;SELECT name FROM users WHERE username='%s'&quot;, username);</span>
-<span class="nc" id="L187">        Statement stmt = connection.createStatement();</span>
-<span class="nc" id="L188">        ResultSet result = stmt.executeQuery(query);</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">        while (result.next()) {</span>
-<span class="nc" id="L190">            name = result.getString(&quot;name&quot;);</span>
+<span class="fc" id="L225">        String name = &quot;&quot;;</span>
+<span class="fc" id="L226">        String query = String.format(&quot;SELECT name FROM users WHERE username='%s'&quot;, username);</span>
+<span class="fc" id="L227">        Statement stmt = connection.createStatement();</span>
+<span class="fc" id="L228">        ResultSet result = stmt.executeQuery(query);</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        while (result.next()) {</span>
+<span class="fc" id="L230">            name = result.getString(&quot;name&quot;);</span>
         }
-<span class="nc" id="L192">        boolean isnotAlready = true;</span>
+<span class="fc" id="L232">        boolean isnotAlready = true;</span>
 
-<span class="nc" id="L194">        int count = 0;</span>
-<span class="nc" id="L195">        String qry2 = String.format(&quot;SELECT count(*) FROM course_offering WHERE course_code='%s' AND instructor='%s'&quot;, code, name);</span>
-<span class="nc" id="L196">        Statement stmt3 = connection.createStatement();</span>
-<span class="nc" id="L197">        ResultSet rst = stmt3.executeQuery(qry2);</span>
-<span class="nc bnc" id="L198" title="All 2 branches missed.">        while (rst.next()) {</span>
-<span class="nc" id="L199">            count = rst.getInt(&quot;count&quot;);</span>
+<span class="fc" id="L234">        int count = 0;</span>
+<span class="fc" id="L235">        String qry2 = String.format(&quot;SELECT count(*) FROM course_offering WHERE course_code='%s' AND instructor='%s'&quot;, code, name);</span>
+<span class="fc" id="L236">        Statement stmt3 = connection.createStatement();</span>
+<span class="fc" id="L237">        ResultSet rst = stmt3.executeQuery(qry2);</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        while (rst.next()) {</span>
+<span class="fc" id="L239">            count = rst.getInt(&quot;count&quot;);</span>
         }
-<span class="nc bnc" id="L201" title="All 2 branches missed.">        if (count &gt;= 1)</span>
-<span class="nc" id="L202">            isnotAlready = false;</span>
-<span class="nc" id="L203">        academicOffice acaoff = new academicOffice();</span>
-<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (isexist) {</span>
-<span class="nc bnc" id="L205" title="All 2 branches missed.">            if (acaoff.floatInst == 1) {</span>
-<span class="nc bnc" id="L206" title="All 2 branches missed.">                if (isnotAlready) {</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if (count &gt;= 1)</span>
+<span class="nc" id="L242">            isnotAlready = false;</span>
+<span class="fc" id="L243">        academicOffice acaoff = new academicOffice();</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if (isexist) {</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">            if (acaoff.floatInst == 1) {</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">                if (isnotAlready) {</span>
 
-<span class="nc" id="L208">                    String qry = String.format(&quot;SELECT minsem_req,core,elective FROM coreElective WHERE course_code='%s'&quot;, code);</span>
-<span class="nc" id="L209">                    Statement stmt2 = connection.createStatement();</span>
-<span class="nc" id="L210">                    ResultSet result2 = stmt2.executeQuery(qry);</span>
-<span class="nc bnc" id="L211" title="All 2 branches missed.">                    while (result2.next()) {</span>
-<span class="nc" id="L212">                        int minsem = result2.getInt(1);</span>
-<span class="nc" id="L213">                        String core = result2.getString(2);</span>
-<span class="nc" id="L214">                        String elective = result2.getString(3);</span>
+<span class="fc" id="L248">                    String qry = String.format(&quot;SELECT minsem_req,core,elective FROM coreElective WHERE course_code='%s'&quot;, code);</span>
+<span class="fc" id="L249">                    Statement stmt2 = connection.createStatement();</span>
+<span class="fc" id="L250">                    ResultSet result2 = stmt2.executeQuery(qry);</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">                    while (result2.next()) {</span>
+<span class="fc" id="L252">                        int minsem = result2.getInt(1);</span>
+<span class="fc" id="L253">                        String core = result2.getString(2);</span>
+<span class="fc" id="L254">                        String elective = result2.getString(3);</span>
 
-<span class="nc" id="L216">                        core = core.replace(&quot;{&quot;, &quot;&quot;);</span>
-<span class="nc" id="L217">                        core = core.replace(&quot;}&quot;, &quot;&quot;);</span>
-<span class="nc" id="L218">                        elective = elective.replace(&quot;{&quot;, &quot;&quot;);</span>
-<span class="nc" id="L219">                        elective = elective.replace(&quot;}&quot;, &quot;&quot;);</span>
-<span class="nc" id="L220">                        core = core.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
-<span class="nc" id="L221">                        elective = elective.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+<span class="fc" id="L256">                        core = core.replace(&quot;{&quot;, &quot;&quot;);</span>
+<span class="fc" id="L257">                        core = core.replace(&quot;}&quot;, &quot;&quot;);</span>
+<span class="fc" id="L258">                        elective = elective.replace(&quot;{&quot;, &quot;&quot;);</span>
+<span class="fc" id="L259">                        elective = elective.replace(&quot;}&quot;, &quot;&quot;);</span>
+<span class="fc" id="L260">                        core = core.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
+<span class="fc" id="L261">                        elective = elective.replace(&quot;\&quot;&quot;, &quot;&quot;);</span>
 
-<span class="nc" id="L223">                        String[] cor = core.split(&quot;,&quot;);</span>
-<span class="nc" id="L224">                        String[] elect = elective.split(&quot;,&quot;);</span>
+<span class="fc" id="L263">                        String[] cor = core.split(&quot;,&quot;);</span>
+<span class="fc" id="L264">                        String[] elect = elective.split(&quot;,&quot;);</span>
 
-<span class="nc" id="L226">                        List&lt;String&gt; co = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L227">                        List&lt;String&gt; elec = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L228" title="All 2 branches missed.">                        for (int i = 0; i &lt; cor.length; i++) {</span>
-<span class="nc" id="L229">                            co.add(cor[i]);</span>
+<span class="fc" id="L266">                        List&lt;String&gt; co = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L267">                        List&lt;String&gt; elec = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">                        for (int i = 0; i &lt; cor.length; i++) {</span>
+<span class="fc" id="L269">                            co.add(cor[i]);</span>
                         }
-<span class="nc bnc" id="L231" title="All 2 branches missed.">                        for (int i = 0; i &lt; elect.length; i++) {</span>
-<span class="nc" id="L232">                            elec.add(elect[i]);</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">                        for (int i = 0; i &lt; elect.length; i++) {</span>
+<span class="fc" id="L272">                            elec.add(elect[i]);</span>
                         }
 
 
-<span class="nc" id="L236">                        Array array = connection.createArrayOf(&quot;VARCHAR&quot;, co.toArray());</span>
-<span class="nc" id="L237">                        Array array2 = connection.createArrayOf(&quot;VARCHAR&quot;, elec.toArray());</span>
+<span class="fc" id="L276">                        Array array = connection.createArrayOf(&quot;VARCHAR&quot;, co.toArray());</span>
+<span class="fc" id="L277">                        Array array2 = connection.createArrayOf(&quot;VARCHAR&quot;, elec.toArray());</span>
 
-<span class="nc" id="L239">                        PreparedStatement pstmt = connection.prepareStatement(&quot;INSERT INTO course_offering VALUES(?,?,?,?,?,?,?)&quot;);</span>
-<span class="nc" id="L240">                        pstmt.setString(1, code);</span>
-<span class="nc" id="L241">                        pstmt.setString(2, name);</span>
-<span class="nc" id="L242">                        pstmt.setString(3, username);</span>
-<span class="nc" id="L243">                        pstmt.setDouble(4, cgpa_const);</span>
-<span class="nc" id="L244">                        pstmt.setInt(5, minsem);</span>
-<span class="nc" id="L245">                        pstmt.setArray(6, array);</span>
-<span class="nc" id="L246">                        pstmt.setArray(7, array2);</span>
+<span class="fc" id="L279">                        PreparedStatement pstmt = connection.prepareStatement(&quot;INSERT INTO course_offering VALUES(?,?,?,?,?,?,?)&quot;);</span>
+<span class="fc" id="L280">                        pstmt.setString(1, code);</span>
+<span class="fc" id="L281">                        pstmt.setString(2, name);</span>
+<span class="fc" id="L282">                        pstmt.setString(3, username);</span>
+<span class="fc" id="L283">                        pstmt.setDouble(4, cgpa_const);</span>
+<span class="fc" id="L284">                        pstmt.setInt(5, minsem);</span>
+<span class="fc" id="L285">                        pstmt.setArray(6, array);</span>
+<span class="fc" id="L286">                        pstmt.setArray(7, array2);</span>
 
-<span class="nc" id="L248">                        pstmt.execute();</span>
-<span class="nc" id="L249">                        pstmt.close();</span>
-<span class="nc" id="L250">                    }</span>
-<span class="nc" id="L251">                } else {</span>
-<span class="nc" id="L252">                    System.out.println(&quot;You have already floated this course\n&quot;);</span>
+<span class="fc" id="L288">                        pstmt.execute();</span>
+<span class="fc" id="L289">                        pstmt.close();</span>
+<span class="fc" id="L290">                    }</span>
+<span class="fc" id="L291">                } else {</span>
+<span class="nc" id="L292">                    System.out.println(&quot;You have already floated this course\n&quot;);</span>
                 }
 
             } else {
-<span class="nc" id="L256">                System.out.println(&quot;Course Registration is not open\n&quot;);</span>
+<span class="nc" id="L296">                System.out.println(&quot;Course Registration is not open\n&quot;);</span>
             }
         }
         else {
-<span class="nc" id="L260">            System.out.println(&quot;This course does not exist int course catalog\n&quot;);</span>
+<span class="nc" id="L300">            System.out.println(&quot;This course does not exist int course catalog\n&quot;);</span>
         }
-<span class="nc" id="L262">    }</span>
+<span class="fc" id="L302">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

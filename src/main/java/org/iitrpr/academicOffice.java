@@ -19,7 +19,7 @@ public class academicOffice {
     public int year=2020;
     public int sem=1;
 
-    public void startNewSemester(Connection connection)
+    public void startNewSemester(Connection connection) throws SQLException
     {
         System.out.println(year);
         System.out.println(sem);
@@ -30,9 +30,12 @@ public class academicOffice {
             year++;
             sem=1;
         }
+        String qry=String.format("DELETE FROM course_offering");
+        Statement stmn=connection.createStatement();
+        stmn.execute(qry);
 
     }
-    public void setEvent(Connection connection) throws IOException {
+    public void setEvent(Connection connection) throws IOException, SQLException {
         System.out.println("1.Open Student course Add/Drop\n2.Open Faculty Course Add/Drop \n3.Close Student course Add/Drop\n4.Close faculty Course Add/Drop\n");
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String op=bfr.readLine();
@@ -40,19 +43,31 @@ public class academicOffice {
         {
             regDreg=1;
             floatInst=0;
+            String qry=String.format("UPDATE event SET regDreg=1 ,floatInst=0");
+            Statement stm=connection.createStatement();
+            stm.execute(qry);
         }
         if(op.equals("2"))
         {
             regDreg=0;
             floatInst=1;
+            String qry=String.format("UPDATE event SET regDreg=0 ,floatInst=1");
+            Statement stm=connection.createStatement();
+            stm.execute(qry);
         }
         if(op.equals("3"))
         {
             regDreg=0;
+            String qry=String.format("UPDATE event SET regDreg=0");
+            Statement stm=connection.createStatement();
+            stm.execute(qry);
         }
         if(op.equals("4"))
         {
             floatInst=0;
+            String qry=String.format("UPDATE event SET floatInst=0");
+            Statement stm=connection.createStatement();
+            stm.execute(qry);
         }
 
     }
@@ -61,6 +76,17 @@ public class academicOffice {
         BufferedReader bfr=new BufferedReader(new InputStreamReader(System.in));
         String entryNO=bfr.readLine();
 
+        Integer countt=0;
+
+        String qry=String.format("select count(*) from students where entry_no='%s'",entryNO);
+        Statement stmte=connection.createStatement();
+        ResultSet res=stmte.executeQuery(qry);
+        while(res.next())
+        {
+            countt=res.getInt("count");
+        }
+        if(countt==0)
+            return "this student doesn't exist!!";
         boolean isCapstoneDone=false;
         double coreCredits=0.0;
         double electiveCredits=0.0;
@@ -115,7 +141,7 @@ public class academicOffice {
 
     }
 
-    public String addNewCourse(Connection connection) throws SQLException, IOException {
+    public boolean addNewCourse(Connection connection) throws SQLException, IOException {
         System.out.println("Enter course code\n");
         BufferedReader reader2=new BufferedReader(new InputStreamReader(System.in));
         String Coursecode=reader2.readLine();
@@ -153,7 +179,16 @@ public class academicOffice {
             }
         }
         Array array = connection.createArrayOf("VARCHAR", preRequis.toArray());
-
+        Integer count=0;
+        String qryt=String.format("SELECT count(*) FROM course_catalog WHERE course_code='%s' AND batch_onward=%d",Coursecode,batch);
+        Statement stmnt=connection.createStatement();
+        ResultSet result=stmnt.executeQuery(qryt);
+        while(result.next())
+        {
+            count=result.getInt("count");
+        }
+        if(count>=1)
+            return false;
         String qry=String.format("INSERT INTO course_catalog VALUES(?,?,?,?,?)");
         PreparedStatement pstmt=connection.prepareStatement(qry);
         pstmt.setString(1,Coursecode);
@@ -180,6 +215,8 @@ public class academicOffice {
                 electivel.add(electives[i]);
             }
         }
+
+
         Array arr2 = connection.createArrayOf("VARCHAR", electivel.toArray());
 
         String qry2=String.format("INSERT INTO coreelective values(?,?,?,?)");
@@ -191,7 +228,7 @@ public class academicOffice {
         pstmt2.execute();
         pstmt2.close();
 
-        return "Course Added Succesfully";
+        return true;
 
     }
     public String generateTranscripts(Connection connection) throws IOException, SQLException {
@@ -204,6 +241,18 @@ public class academicOffice {
         String semester= bfr.readLine();
         Integer sem=Integer.parseInt(semester);
         System.out.println(sem);
+
+        Integer count=0;
+
+        String qry=String.format("select count(*) from students where entry_no='%s'",entryNo);
+        Statement stmte=connection.createStatement();
+        ResultSet res=stmte.executeQuery(qry);
+        while(res.next())
+        {
+            count=res.getInt("count");
+        }
+        if(count==0)
+            return "this student doesn't exist!!";
         entryNo=entryNo.toLowerCase();
         String tabname='s'+entryNo;
         String code="";
@@ -343,7 +392,18 @@ public class academicOffice {
 
     }
 
-    public String addStudent(Connection connection,String name,String email,String entryno,String dept,Integer entryyr) throws SQLException {
+    public boolean addStudent(Connection connection,String name,String email,String entryno,String dept,Integer entryyr) throws SQLException {
+
+        Integer count=0;
+        String qryt=String.format("SELECT count(*) FROM students WHERE entry_no='%s'",entryno);
+        Statement stmnt=connection.createStatement();
+        ResultSet result=stmnt.executeQuery(qryt);
+        while(result.next())
+        {
+            count=result.getInt("count");
+        }
+        if(count>=1)
+            return false;
 
             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO students VALUES(?, ?, ?, ?, ?)");
             pstmt.setString(1, name);
@@ -362,7 +422,7 @@ public class academicOffice {
             System.out.println("Student Record Created Successfully!!");
 
 
-            return "Student Record Created Successfully!!";
+            return true;
 
         }
 

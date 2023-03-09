@@ -14,13 +14,36 @@ import java.util.Scanner;
 //INSERT INTO coreElective VALUES('CS301',1,'{"CSE,MNC"}','{"CIV"}');
 
 public class instructor {
-    void updateGrades(Connection connection) throws IOException, SQLException {
+    public boolean updateGrades(Connection connection,String username) throws IOException, SQLException {
         System.out.println("enter the course code :\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
         String code=reader.readLine();
-        String file="./src/datafeed/grades.csv";
+        String file="";
+        System.out.println("Enter the file path to upload the grades");
+        file= reader.readLine();
+        file="./src/datafeed/grades.csv";
         BufferedReader read = null;
         String line="";
+
+        String  name="";
+        String q2=String.format("SELeCT name from users where username='%s'",username);
+        Statement stmt=connection.createStatement();
+        ResultSet result=stmt.executeQuery(q2);
+        while (result.next())
+        {
+            name=result.getString("name");
+
+        }
+       Integer count=0;
+        String qery=String.format("select count(*) from course_offering where course_code='%s' and instructor='%s'",code,name);
+        Statement stmnt=connection.createStatement();
+        ResultSet res=stmnt.executeQuery(qery);
+        while(res.next())
+        {
+            count=res.getInt("count");
+        }
+        if(count==0)
+            return false;
 
         read=new BufferedReader(new FileReader(file));
         while((line= read.readLine())!=null)
@@ -30,13 +53,14 @@ public class instructor {
             String grade=row[1];
             String tabname='s'+entryNO;
             String qry=String.format("UPDATE %s SET grade = '%s' WHERE course_code='%s'",tabname,grade,code);
-            PreparedStatement stmt=connection.prepareStatement(qry);
-            stmt.execute();
-            stmt.close();
+            PreparedStatement stmt2=connection.prepareStatement(qry);
+            stmt2.execute();
+            stmt2.close();
         }
+        return true;
 
     }
-    public String coursesOffered(Connection connection,String username) throws SQLException {
+    public boolean coursesOffered(Connection connection,String username) throws SQLException {
         String toreturn="";
         String name = "";
         String query = String.format("SELECT name FROM users WHERE username='%s'", username);
@@ -62,10 +86,10 @@ public class instructor {
             System.out.println("\n");//Move to the next line to print the next row.
             toreturn+="\n";
         }
-       return toreturn;
+       return true;
 
     }
-    public String  viewGrades(Connection connection,String username) throws IOException, SQLException {
+    public boolean  viewGrades(Connection connection,String username) throws IOException, SQLException {
         String toreturn="";
         System.out.println("Enter the Entry No. of the Student You wanna see the grades\n");
         BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
@@ -106,15 +130,31 @@ public class instructor {
                 toreturn+="\n";
 
             }
-            return toreturn;
+            return true;
         }
         else {
             System.out.println("This Student doesn't exists .. Please Enter the correct entry no\n");
-            return "This Student doesn't exists .. Please Enter the correct entry no\n";
+            return false;
         }
 
     }
-    public void dRegisterCourse(Connection connection,String username) throws IOException, SQLException {
+    public boolean dRegisterCourse(Connection connection,String username) throws IOException, SQLException {
+        Integer regDreg=0;
+        Integer floatInst=0;
+        Integer year=0;
+        Integer sem=0;
+
+        String qryt=String.format("SELECT regDreg ,floatInst,year,sem from event");
+        Statement stmn=connection.createStatement();
+        ResultSet ress=stmn.executeQuery(qryt);
+        while(ress.next())
+        {
+            regDreg=ress.getInt("regDreg");
+            floatInst=ress.getInt("floatInst");
+            year=ress.getInt("year");
+            sem=ress.getInt("sem");
+
+        }
         System.out.println("Enter the course You wanna Deregister\n");
         BufferedReader rdr=new BufferedReader(new InputStreamReader(System.in));
         String code=rdr.readLine();
@@ -138,7 +178,7 @@ public class instructor {
         if (count == 1)
             isAlready = true;
         academicOffice acoff=new academicOffice();
-        if(acoff.floatInst==1)
+        if(floatInst==1)
         {
             if(isAlready)
             {
@@ -160,7 +200,7 @@ public class instructor {
             System.out.println("Course DeRegistration window is not open\n");
         }
 
-
+return true;
 
     }
     public void registerCourse(Connection connection,String username) throws IOException, SQLException {

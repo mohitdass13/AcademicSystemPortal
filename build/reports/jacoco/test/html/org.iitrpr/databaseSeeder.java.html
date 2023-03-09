@@ -89,24 +89,24 @@ import java.util.Scanner;
 <span class="nc" id="L89">   }</span>
     public void userseeder(Connection connection)
     {
-<span class="nc" id="L92">        String file=&quot;./src/datafeed/users.csv&quot;;</span>
-<span class="nc" id="L93">        BufferedReader read = null;</span>
-<span class="nc" id="L94">        String line=&quot;&quot;;</span>
+<span class="fc" id="L92">        String file=&quot;./src/datafeed/users.csv&quot;;</span>
+<span class="fc" id="L93">        BufferedReader read = null;</span>
+<span class="fc" id="L94">        String line=&quot;&quot;;</span>
         try{
-<span class="nc" id="L96">            read=new BufferedReader(new FileReader(file));</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">            while((line= read.readLine())!=null)</span>
+<span class="fc" id="L96">            read=new BufferedReader(new FileReader(file));</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">            while((line= read.readLine())!=null)</span>
             {
-<span class="nc" id="L99">                String[] row=line.split(&quot;,&quot;);</span>
-<span class="nc" id="L100">                String username=row[0];</span>
-<span class="nc" id="L101">                String pass=row[1];</span>
-<span class="nc" id="L102">                String name=row[2];</span>
-<span class="nc" id="L103">                String role=row[3];</span>
+<span class="fc" id="L99">                String[] row=line.split(&quot;,&quot;);</span>
+<span class="fc" id="L100">                String username=row[0];</span>
+<span class="fc" id="L101">                String pass=row[1];</span>
+<span class="fc" id="L102">                String name=row[2];</span>
+<span class="fc" id="L103">                String role=row[3];</span>
 
-<span class="nc" id="L105">                PreparedStatement pstmt=connection.prepareStatement(&quot;INSERT INTO users VALUES(?,?,?,?)&quot;);</span>
-<span class="nc" id="L106">                pstmt.setString(1,username);</span>
-<span class="nc" id="L107">                pstmt.setString(2,pass);</span>
-<span class="nc" id="L108">                pstmt.setString(3,name);</span>
-<span class="nc" id="L109">                pstmt.setString(4,role);</span>
+<span class="fc" id="L105">                PreparedStatement pstmt=connection.prepareStatement(&quot;INSERT INTO users VALUES(?,?,?,?)&quot;);</span>
+<span class="fc" id="L106">                pstmt.setString(1,username);</span>
+<span class="fc" id="L107">                pstmt.setString(2,pass);</span>
+<span class="fc" id="L108">                pstmt.setString(3,name);</span>
+<span class="fc" id="L109">                pstmt.setString(4,role);</span>
 <span class="nc" id="L110">                pstmt.execute();</span>
 <span class="nc" id="L111">                pstmt.close();</span>
 
@@ -118,18 +118,18 @@ import java.util.Scanner;
 <span class="nc" id="L118">                    pstmt2.close();</span>
                 }
 <span class="nc" id="L120">            }</span>
-<span class="nc" id="L121">        }catch(Exception e)</span>
+<span class="fc" id="L121">        }catch(Exception e)</span>
         {
-<span class="nc" id="L123">            e.printStackTrace();</span>
+<span class="fc" id="L123">            e.printStackTrace();</span>
         }finally {
             try{
-<span class="nc" id="L126">                read.close();</span>
+<span class="fc" id="L126">                read.close();</span>
 <span class="nc" id="L127">            }catch (IOException e)</span>
             {
 <span class="nc" id="L129">                e.printStackTrace();</span>
-<span class="nc" id="L130">            }</span>
+<span class="fc" id="L130">            }</span>
         }
-<span class="nc" id="L132">    }</span>
+<span class="fc" id="L132">    }</span>
     public static void main(String[] args) {
 
 <span class="nc" id="L135">        databaseSeeder dbs=new databaseSeeder();</span>
